@@ -9,6 +9,10 @@ export async function GET(request: NextRequest) {
             const user = req.user!;
             const db = getDatabase();
 
+            if (!user.clinicId) {
+                return ApiResponse.error('Usuario sin clínica asignada', 400);
+            }
+
             // Get customers from the same clinic
             const result = await db.execute({
                 sql: `SELECT c.id, c.name, c.email, c.phone, c.date_of_birth, c.identification_number, 

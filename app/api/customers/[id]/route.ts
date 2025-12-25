@@ -43,6 +43,9 @@ export async function GET(
 
             // If employee, check if customer belongs to their clinic
             if (user.provider === 'employee') {
+                if (!user.clinicId) {
+                    return ApiResponse.error('Usuario sin clínica asignada', 400);
+                }
                 const customer = result.rows[0] as any;
                 if (customer.clinic_id !== user.clinicId) {
                     return ApiResponse.forbidden('No tienes acceso a este cliente');

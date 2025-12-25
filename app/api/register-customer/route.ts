@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         const customer = await db.execute({
             sql: `SELECT id, name, email, phone, date_of_birth, identification_number, gender, verified_email, clinic_id, address_id, created_at
             FROM customers WHERE id = ?`,
-            args: [result.lastInsertRowid],
+            args: [Number(result.lastInsertRowid)],
         });
 
         return ApiResponse.created(

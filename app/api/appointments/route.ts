@@ -29,6 +29,9 @@ export async function GET(request: NextRequest) {
                 args.push(user.userId);
             } else {
                 // Employee can see appointments from their clinic
+                if (!user.clinicId) {
+                    return ApiResponse.error('Usuario sin clínica asignada', 400);
+                }
                 sql += ' WHERE a.clinic_id = ?';
                 args.push(user.clinicId);
             }
@@ -115,7 +118,7 @@ export async function POST(request: NextRequest) {
               LEFT JOIN clinics c ON a.clinic_id = c.id
               LEFT JOIN services s ON a.service_id = s.id
               WHERE a.id = ?`,
-                args: [result.lastInsertRowid],
+                args: [Number(result.lastInsertRowid)],
             });
 
             // Invalidate cache

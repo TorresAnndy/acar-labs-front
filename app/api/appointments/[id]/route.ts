@@ -45,8 +45,13 @@ export async function GET(
                 return ApiResponse.forbidden('No tienes acceso a esta cita');
             }
 
-            if (user.provider === 'employee' && appointment.clinic_id !== user.clinicId) {
-                return ApiResponse.forbidden('No tienes acceso a esta cita');
+            if (user.provider === 'employee') {
+                if (!user.clinicId) {
+                    return ApiResponse.error('Usuario sin clínica asignada', 400);
+                }
+                if (appointment.clinic_id !== user.clinicId) {
+                    return ApiResponse.forbidden('No tienes acceso a esta cita');
+                }
             }
 
             return ApiResponse.success(appointment);
@@ -92,8 +97,13 @@ export async function PUT(
                 return ApiResponse.forbidden('No tienes permiso para modificar esta cita');
             }
 
-            if (user.provider === 'employee' && appointment.clinic_id !== user.clinicId) {
-                return ApiResponse.forbidden('No tienes permiso para modificar esta cita');
+            if (user.provider === 'employee') {
+                if (!user.clinicId) {
+                    return ApiResponse.error('Usuario sin clínica asignada', 400);
+                }
+                if (appointment.clinic_id !== user.clinicId) {
+                    return ApiResponse.forbidden('No tienes permiso para modificar esta cita');
+                }
             }
 
             // Build update query
