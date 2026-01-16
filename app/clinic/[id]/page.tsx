@@ -70,6 +70,12 @@ interface Invoice {
     [key: string]: any;
 }
 
+interface UserSearchResult {
+    id: number;
+    name: string;
+    email: string;
+}
+
 type Tab = 'home' | 'citas' | 'servicios' | 'laboratorio' | 'facturas' | 'empleados';
 
 export default function ClinicDetailsPage() {
@@ -87,7 +93,10 @@ export default function ClinicDetailsPage() {
     const [activeTab, setActiveTab] = useState<Tab>('home');
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [userRole, setUserRole] = useState<string | null>(null);
-    
+
+    const [searchEmail, setSearchEmail] = useState('');
+    const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
+    const [searchLoading, setSearchLoading] = useState(false);
 
     useEffect(() => {
         const fetchClinicData = async () => {
@@ -119,7 +128,7 @@ export default function ClinicDetailsPage() {
                 }
 
                 const selectData = await selectRes.json();
-                
+
                 // Update token and store clinic info
                 if (selectData.access_token) {
                     localStorage.setItem('auth_token', selectData.access_token);
@@ -140,13 +149,13 @@ export default function ClinicDetailsPage() {
                 if (userRes.ok) {
                     const userData = await userRes.json();
                     const user = userData.data || userData;
-                    
+
                     // Find the clinic from user's employees
                     if (user.employees && Array.isArray(user.employees)) {
                         const clinicEmployee = user.employees.find(
                             (emp: any) => emp.clinic_id === clinicIdNumber
                         );
-                        
+
                         if (clinicEmployee && clinicEmployee.clinic) {
                             // Set user role from clinicEmployee
                             if (clinicEmployee.role) {
@@ -176,7 +185,7 @@ export default function ClinicDetailsPage() {
                                 if (employeesRes.ok) {
                                     const employeesData = await employeesRes.json();
                                     const employees = employeesData.data || employeesData;
-                                                                        
+
                                     // Update clinic with employees
                                     setClinic((prev) => {
                                         const updated = prev ? { ...prev, employees: Array.isArray(employees) ? employees : [employees] } : null;
@@ -207,6 +216,29 @@ export default function ClinicDetailsPage() {
         }
     }, [clinicId, router]);
 
+    const handleSearchUser = async () => {
+        if (!searchEmail) return;
+
+        setSearchLoading(true);
+        try {
+            const token = localStorage.getItem('auth_token');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+            const res = await fetch(`${apiUrl}/users?email=${searchEmail}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = await res.json();
+            setSearchResults(data.data || []);
+        } catch (e) {
+            console.log('Error buscando usuarios');
+        } finally {
+            setSearchLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-white dark:bg-[#0a1929] flex">
             {/* Sidebar - Full Height */}
@@ -227,11 +259,10 @@ export default function ClinicDetailsPage() {
                 <nav className="p-4 space-y-2 flex-1">
                     <button
                         onClick={() => setActiveTab('home')}
-                        className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${
-                            activeTab === 'home'
+                        className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${activeTab === 'home'
                                 ? 'bg-[#003366] text-white dark:bg-blue-600'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
+                            }`}
                         title={!sidebarOpen ? 'Home' : ''}
                     >
                         <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,11 +273,10 @@ export default function ClinicDetailsPage() {
 
                     <button
                         onClick={() => setActiveTab('citas')}
-                        className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${
-                            activeTab === 'citas'
+                        className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${activeTab === 'citas'
                                 ? 'bg-[#003366] text-white dark:bg-blue-600'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
+                            }`}
                         title={!sidebarOpen ? 'Citas' : ''}
                     >
                         <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,11 +287,10 @@ export default function ClinicDetailsPage() {
 
                     <button
                         onClick={() => setActiveTab('servicios')}
-                        className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${
-                            activeTab === 'servicios'
+                        className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${activeTab === 'servicios'
                                 ? 'bg-[#003366] text-white dark:bg-blue-600'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
+                            }`}
                         title={!sidebarOpen ? 'Servicios' : ''}
                     >
                         <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,11 +301,10 @@ export default function ClinicDetailsPage() {
 
                     <button
                         onClick={() => setActiveTab('laboratorio')}
-                        className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${
-                            activeTab === 'laboratorio'
+                        className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${activeTab === 'laboratorio'
                                 ? 'bg-[#003366] text-white dark:bg-blue-600'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
+                            }`}
                         title={!sidebarOpen ? 'Laboratorio' : ''}
                     >
                         <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -287,11 +315,10 @@ export default function ClinicDetailsPage() {
 
                     <button
                         onClick={() => setActiveTab('facturas')}
-                        className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${
-                            activeTab === 'facturas'
+                        className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${activeTab === 'facturas'
                                 ? 'bg-[#003366] text-white dark:bg-blue-600'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
+                            }`}
                         title={!sidebarOpen ? 'Facturas' : ''}
                     >
                         <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,22 +328,21 @@ export default function ClinicDetailsPage() {
                     </button>
 
                     {userRole === 'OWNER' && (
-                    <button
-                        onClick={() => setActiveTab('empleados')}
-                        className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${
-                            activeTab === 'empleados'
-                                ? 'bg-[#003366] text-white dark:bg-blue-600'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                        title={!sidebarOpen ? 'Empleados' : ''}
-                    >
-                        <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM18.5 20H20v-2a3 3 0 00-.5-1.5M5 20v-2a3 3 0 015.856-1.487M7 10a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        {sidebarOpen && <span>Empleados</span>}
-                    </button>
+                        <button
+                            onClick={() => setActiveTab('empleados')}
+                            className={`w-full flex items-center gap-3 px-4 py-4 rounded-lg transition-all font-medium ${activeTab === 'empleados'
+                                    ? 'bg-[#003366] text-white dark:bg-blue-600'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                }`}
+                            title={!sidebarOpen ? 'Empleados' : ''}
+                        >
+                            <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM18.5 20H20v-2a3 3 0 00-.5-1.5M5 20v-2a3 3 0 015.856-1.487M7 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {sidebarOpen && <span>Empleados</span>}
+                        </button>
                     )}
-                    
+
                 </nav>
 
                 {/* Close Button at Bottom */}
@@ -350,7 +376,7 @@ export default function ClinicDetailsPage() {
                                 </div>
                             </div>
                         </div>
-                        
+
                         {/* Clinic Info Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
@@ -509,291 +535,334 @@ export default function ClinicDetailsPage() {
 
                             {/* Citas Tab */}
                             {activeTab === 'citas' && (
-                        <div>
-                            <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Citas Agendadas</h2>
-                                <p className="text-gray-600 dark:text-gray-400">Gestiona todas tus citas y appointments</p>
-                            </div>
+                                <div>
+                                    <div className="mb-8">
+                                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Citas Agendadas</h2>
+                                        <p className="text-gray-600 dark:text-gray-400">Gestiona todas tus citas y appointments</p>
+                                    </div>
 
-                            {appointments.length > 0 ? (
-                                <div className="grid gap-6">
-                                    {appointments.map((appointment) => (
-                                        <div
-                                            key={appointment.id}
-                                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow"
-                                        >
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div>
-                                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                        {appointment.patient_name}
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-                                                        {appointment.service}
-                                                    </p>
-                                                </div>
-                                                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                                                    appointment.status === 'confirmed'
-                                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
-                                                        : appointment.status === 'pending'
-                                                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
-                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
-                                                }`}>
-                                                    {appointment.status === 'confirmed' ? 'Confirmada' : appointment.status === 'pending' ? 'Pendiente' : 'Cancelada'}
-                                                </span>
-                                            </div>
-                                            <div className="flex gap-6 text-sm">
-                                                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                    {appointment.date}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    {appointment.time}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-12 text-center border-2 border-dashed border-blue-200 dark:border-blue-800">
-                                    <svg className="w-16 h-16 text-blue-400 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    <p className="text-gray-600 dark:text-gray-400 text-lg">No hay citas agendadas</p>
-                                    <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Agenda tu primera cita ahora</p>
-                                </div>
-                            )}
-                            </div>
-                        )}
-
-                        {/* Servicios Tab */}
-                        {activeTab === 'servicios' && (
-                            <div>
-                            <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Servicios Disponibles</h2>
-                                <p className="text-gray-600 dark:text-gray-400">Todos los análisis y servicios que ofrecemos</p>
-                            </div>
-
-                            {services.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {services.map((service) => (
-                                        <div
-                                            key={service.id}
-                                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg hover:border-[#003366] dark:hover:border-blue-500 transition-all cursor-pointer group"
-                                        >
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                    <svg className="w-6 h-6 text-[#003366] dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                                    </svg>
-                                                </div>
-                                                <span className="text-2xl font-bold text-[#003366] dark:text-blue-400">
-                                                    ${service.price.toFixed(2)}
-                                                </span>
-                                            </div>
-                                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-lg">
-                                                {service.name}
-                                            </h3>
-                                            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
-                                                {service.description}
-                                            </p>
-                                            <button className="w-full bg-[#003366] hover:bg-[#00509e] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition-colors">
-                                                Agendar Cita
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-12 text-center border-2 border-dashed border-blue-200 dark:border-blue-800">
-                                    <svg className="w-16 h-16 text-blue-400 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7 12a5 5 0 1110 0A5 5 0 017 12z" />
-                                    </svg>
-                                    <p className="text-gray-600 dark:text-gray-400 text-lg">No hay servicios disponibles</p>
-                                </div>
-                            )}
-                            </div>
-                        )}
-
-                        {/* Laboratorio Tab */}
-                        {activeTab === 'laboratorio' && (
-                            <div>
-                            <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Resultados de Laboratorio</h2>
-                                <p className="text-gray-600 dark:text-gray-400">Consulta los resultados de tus análisis</p>
-                            </div>
-
-                            {labResults.length > 0 ? (
-                                <div className="grid gap-6">
-                                    {labResults.map((result) => (
-                                        <div
-                                            key={result.id}
-                                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow"
-                                        >
-                                            <div className="flex items-start justify-between">
-                                                <div>
-                                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                                        {result.name}
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                                                        Fecha: {result.date}
-                                                    </p>
-                                                </div>
-                                                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                                                    result.status === 'ready'
-                                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
-                                                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
-                                                }`}>
-                                                    {result.status === 'ready' ? 'Disponible' : 'En Proceso'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-12 text-center border-2 border-dashed border-blue-200 dark:border-blue-800">
-                                    <svg className="w-16 h-16 text-blue-400 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.452a6 6 0 00-3.86.454l-.312.049a6 6 0 00-3.86-.454l-2.387.452a2 2 0 00-1.022.547m19.5-3.757l-23.5 3.757" />
-                                    </svg>
-                                    <p className="text-gray-600 dark:text-gray-400 text-lg">No hay resultados disponibles</p>
-                                    <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Los resultados aparecerán aquí cuando estén listos</p>
-                                </div>
-                            )}
-                            </div>
-                        )}
-
-                        {/* Empleados Tab */}
-                        {activeTab === 'empleados' && userRole === 'OWNER' && (
-                            <div>
-                            <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Gestión de Empleados</h2>
-                                <p className="text-gray-600 dark:text-gray-400">Administra los empleados de tu clínica</p>
-                            </div>
-
-                            {clinic?.employees && clinic.employees.length > 0 ? (
-                                <div className="grid gap-6">
-                                    {clinic.employees.map((employee: any) => (
-                                        <div
-                                            key={employee.id}
-                                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow"
-                                        >
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-full flex items-center justify-center">
-                                                        <svg className="w-6 h-6 text-[#003366] dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                        </svg>
+                                    {appointments.length > 0 ? (
+                                        <div className="grid gap-6">
+                                            {appointments.map((appointment) => (
+                                                <div
+                                                    key={appointment.id}
+                                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                                                >
+                                                    <div className="flex items-start justify-between mb-4">
+                                                        <div>
+                                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                                {appointment.patient_name}
+                                                            </h3>
+                                                            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                                                                {appointment.service}
+                                                            </p>
+                                                        </div>
+                                                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${appointment.status === 'confirmed'
+                                                                ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
+                                                                : appointment.status === 'pending'
+                                                                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
+                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
+                                                            }`}>
+                                                            {appointment.status === 'confirmed' ? 'Confirmada' : appointment.status === 'pending' ? 'Pendiente' : 'Cancelada'}
+                                                        </span>
                                                     </div>
-                                                    <div>
-                                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                            {employee.name || 'Empleado'}
-                                                        </h3>
-                                                        <p className="text-gray-600 dark:text-gray-400 text-sm">
-                                                            {employee.email || 'Sin email'}
-                                                        </p>
+                                                    <div className="flex gap-6 text-sm">
+                                                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                            </svg>
+                                                            {appointment.date}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            {appointment.time}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <span className="px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400">
-                                                    {employee.role?.name || 'Sin rol'}
-                                                </span>
-                                            </div>
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                                <div>
-                                                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Estado</p>
-                                                    <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                                                        {employee.status === 'active' ? '✓ Activo' : '✕ Inactivo'}
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-12 text-center border-2 border-dashed border-blue-200 dark:border-blue-800">
+                                            <svg className="w-16 h-16 text-blue-400 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <p className="text-gray-600 dark:text-gray-400 text-lg">No hay citas agendadas</p>
+                                            <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Agenda tu primera cita ahora</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Servicios Tab */}
+                            {activeTab === 'servicios' && (
+                                <div>
+                                    <div className="mb-8">
+                                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Servicios Disponibles</h2>
+                                        <p className="text-gray-600 dark:text-gray-400">Todos los análisis y servicios que ofrecemos</p>
+                                    </div>
+
+                                    {services.length > 0 ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {services.map((service) => (
+                                                <div
+                                                    key={service.id}
+                                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg hover:border-[#003366] dark:hover:border-blue-500 transition-all cursor-pointer group"
+                                                >
+                                                    <div className="flex items-start justify-between mb-4">
+                                                        <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                            <svg className="w-6 h-6 text-[#003366] dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                                            </svg>
+                                                        </div>
+                                                        <span className="text-2xl font-bold text-[#003366] dark:text-blue-400">
+                                                            ${service.price.toFixed(2)}
+                                                        </span>
+                                                    </div>
+                                                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-lg">
+                                                        {service.name}
+                                                    </h3>
+                                                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                                                        {service.description}
                                                     </p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Especialidad</p>
-                                                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{employee.specialty || 'General'}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Teléfono</p>
-                                                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{employee.phone || '-'}</p>
-                                                </div>
-                                                <div className="flex items-end gap-2">
-                                                    <button className="flex-1 bg-[#003366] hover:bg-[#00509e] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-colors text-sm">
-                                                        Editar
+                                                    <button className="w-full bg-[#003366] hover:bg-[#00509e] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition-colors">
+                                                        Agendar Cita
                                                     </button>
                                                 </div>
-                                            </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-12 text-center border-2 border-dashed border-blue-200 dark:border-blue-800">
-                                    <svg className="w-16 h-16 text-blue-400 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM18.5 20H20v-2a3 3 0 00-.5-1.5M5 20v-2a3 3 0 015.856-1.487M7 10a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    <p className="text-gray-600 dark:text-gray-400 text-lg">No hay empleados registrados</p>
-                                    <button className="mt-4 bg-[#003366] hover:bg-[#00509e] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
-                                        Agregar Empleado
-                                    </button>
+                                    ) : (
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-12 text-center border-2 border-dashed border-blue-200 dark:border-blue-800">
+                                            <svg className="w-16 h-16 text-blue-400 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7 12a5 5 0 1110 0A5 5 0 017 12z" />
+                                            </svg>
+                                            <p className="text-gray-600 dark:text-gray-400 text-lg">No hay servicios disponibles</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
-                            </div>
-                        )}
 
-                        {/* Facturas Tab */}
-                        {activeTab === 'facturas' && (
-                            <div>
-                            <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Facturas</h2>
-                                <p className="text-gray-600 dark:text-gray-400">Descarga tus recibos y facturas</p>
-                            </div>
+                            {/* Laboratorio Tab */}
+                            {activeTab === 'laboratorio' && (
+                                <div>
+                                    <div className="mb-8">
+                                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Resultados de Laboratorio</h2>
+                                        <p className="text-gray-600 dark:text-gray-400">Consulta los resultados de tus análisis</p>
+                                    </div>
 
-                            {invoices.length > 0 ? (
-                                <div className="grid gap-6">
-                                    {invoices.map((invoice) => (
-                                        <div
-                                            key={invoice.id}
-                                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow"
-                                        >
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div>
-                                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                        Factura #{invoice.number}
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-                                                        Fecha: {invoice.date}
-                                                    </p>
+                                    {labResults.length > 0 ? (
+                                        <div className="grid gap-6">
+                                            {labResults.map((result) => (
+                                                <div
+                                                    key={result.id}
+                                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                                                >
+                                                    <div className="flex items-start justify-between">
+                                                        <div>
+                                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                                                {result.name}
+                                                            </h3>
+                                                            <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                                                Fecha: {result.date}
+                                                            </p>
+                                                        </div>
+                                                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${result.status === 'ready'
+                                                                ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
+                                                                : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
+                                                            }`}>
+                                                            {result.status === 'ready' ? 'Disponible' : 'En Proceso'}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                                                    invoice.status === 'paid'
-                                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
-                                                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
-                                                }`}>
-                                                    {invoice.status === 'paid' ? 'Pagada' : 'Pendiente'}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                                                    ${invoice.total.toFixed(2)}
-                                                </span>
-                                                <button className="flex items-center gap-2 bg-[#003366] hover:bg-[#00509e] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                    </svg>
-                                                    Descargar
-                                                </button>
-                                            </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-12 text-center border-2 border-dashed border-blue-200 dark:border-blue-800">
-                                    <svg className="w-16 h-16 text-blue-400 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                    </svg>
-                                    <p className="text-gray-600 dark:text-gray-400 text-lg">No hay facturas disponibles</p>
+                                    ) : (
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-12 text-center border-2 border-dashed border-blue-200 dark:border-blue-800">
+                                            <svg className="w-16 h-16 text-blue-400 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.452a6 6 0 00-3.86.454l-.312.049a6 6 0 00-3.86-.454l-2.387.452a2 2 0 00-1.022.547m19.5-3.757l-23.5 3.757" />
+                                            </svg>
+                                            <p className="text-gray-600 dark:text-gray-400 text-lg">No hay resultados disponibles</p>
+                                            <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Los resultados aparecerán aquí cuando estén listos</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
-                            </div>
-                        )}
+
+                            {/* Empleados Tab */}
+
+                            {activeTab === 'empleados' && userRole === 'OWNER' && (
+                                <div>
+                                    <div className="mb-8">
+                                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Gestión de Empleados</h2>
+                                        <p className="text-gray-600 dark:text-gray-400">Administra los empleados de tu clínica</p>
+                                    </div>
+
+                                    {clinic?.employees && clinic.employees.length > 0 ? (
+                                        <div className="grid gap-6">
+                                            {clinic.employees.map((employee: any) => (
+                                                <div
+                                                    key={employee.id}
+                                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                                                >
+                                                    <div className="flex items-start justify-between mb-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-full flex items-center justify-center">
+                                                                <svg className="w-6 h-6 text-[#003366] dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                                    {employee.name || 'Empleado'}
+                                                                </h3>
+                                                                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                                                    {employee.email || 'Sin email'}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <span className="px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400">
+                                                            {employee.role?.name || 'Sin rol'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                                        <div>
+                                                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Estado</p>
+                                                            <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                                                                {employee.status === 'active' ? '✓ Activo' : '✕ Inactivo'}
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Especialidad</p>
+                                                            <p className="font-semibold text-gray-900 dark:text-white text-sm">{employee.specialty || 'General'}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Teléfono</p>
+                                                            <p className="font-semibold text-gray-900 dark:text-white text-sm">{employee.phone || '-'}</p>
+                                                        </div>
+                                                        <div className="flex items-end gap-2">
+                                                            <button className="flex-1 bg-[#003366] hover:bg-[#00509e] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-colors text-sm">
+                                                                Editar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-12 text-center border-2 border-dashed border-blue-200 dark:border-blue-800">
+                                            <svg className="w-16 h-16 text-blue-400 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM18.5 20H20v-2a3 3 0 00-.5-1.5M5 20v-2a3 3 0 015.856-1.487M7 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            <p className="text-gray-600 dark:text-gray-400 text-lg">No hay empleados registrados</p>
+                                            <button className="mt-4 bg-[#003366] hover:bg-[#00509e] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                                                Agregar Empleado
+                                            </button>
+                                        </div>
+                                    )}
+                                    {/* Agregar Empleado */}
+                                    <div className="mb-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                                        <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                                            Agregar empleado
+                                        </h3>
+
+                                        <div className="flex gap-4">
+                                            <input
+                                                type="email"
+                                                placeholder="Correo del usuario"
+                                                value={searchEmail}
+                                                onChange={(e) => setSearchEmail(e.target.value)}
+                                                className="flex-1 px-4 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-600"
+                                            />
+                                            <button
+                                                onClick={handleSearchUser}
+                                                className="bg-[#003366] hover:bg-[#00509e] text-white px-6 rounded-lg"
+                                            >
+                                                Buscar
+                                            </button>
+                                        </div>
+
+                                        {/* Resultados */}
+                                        <div className="mt-6 space-y-4">
+                                            {searchLoading && <p>Buscando...</p>}
+
+                                            {searchResults.map(user => (
+                                                <div
+                                                    key={user.id}
+                                                    className="flex items-center justify-between border p-4 rounded-lg dark:border-gray-700"
+                                                >
+                                                    <div>
+                                                        <p className="font-semibold">{user.name}</p>
+                                                        <p className="text-sm text-gray-500">{user.email}</p>
+                                                    </div>
+                                                    <button
+                                                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                                                    >
+                                                        Invitar
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                            )}
+
+                            {/* Facturas Tab */}
+                            {activeTab === 'facturas' && (
+                                <div>
+                                    <div className="mb-8">
+                                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Facturas</h2>
+                                        <p className="text-gray-600 dark:text-gray-400">Descarga tus recibos y facturas</p>
+                                    </div>
+
+                                    {invoices.length > 0 ? (
+                                        <div className="grid gap-6">
+                                            {invoices.map((invoice) => (
+                                                <div
+                                                    key={invoice.id}
+                                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                                                >
+                                                    <div className="flex items-start justify-between mb-4">
+                                                        <div>
+                                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                                Factura #{invoice.number}
+                                                            </h3>
+                                                            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                                                                Fecha: {invoice.date}
+                                                            </p>
+                                                        </div>
+                                                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${invoice.status === 'paid'
+                                                                ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
+                                                                : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
+                                                            }`}>
+                                                            {invoice.status === 'paid' ? 'Pagada' : 'Pendiente'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                                                            ${invoice.total.toFixed(2)}
+                                                        </span>
+                                                        <button className="flex items-center gap-2 bg-[#003366] hover:bg-[#00509e] dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                            </svg>
+                                                            Descargar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-12 text-center border-2 border-dashed border-blue-200 dark:border-blue-800">
+                                            <svg className="w-16 h-16 text-blue-400 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                            </svg>
+                                            <p className="text-gray-600 dark:text-gray-400 text-lg">No hay facturas disponibles</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
