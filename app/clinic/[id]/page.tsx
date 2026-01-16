@@ -224,7 +224,7 @@ export default function ClinicDetailsPage() {
             const token = localStorage.getItem('auth_token');
             const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-            const res = await fetch(`${apiUrl}/users?email=${searchEmail}`, {
+            const res = await fetch(`${apiUrl}/employees/search?email=${searchEmail}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
