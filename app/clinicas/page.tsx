@@ -6,8 +6,8 @@ import SearchBar from '@/components/ui/SearchBar';
 import Link from 'next/link';
 
 export default function ClinicasPage() {
-    const [clinics, setClinics] = useState<any[]>([]);
-    const [filteredClinics, setFilteredClinics] = useState<any[]>([]);
+    const [clinics, setClinics] = useState<Array<any>>([]);
+    const [filteredClinics, setFilteredClinics] = useState<Array<any>>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
