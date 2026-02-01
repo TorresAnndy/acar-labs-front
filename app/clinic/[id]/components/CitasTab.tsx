@@ -17,7 +17,9 @@ interface Props {
   appointments: Appointment[];
 }
 
+
 export default function CitasTab({ appointments }: Props) {
+  
   const formatDateTime = (dateString: string) => {
     try {
       const dateObj = new Date(dateString);
