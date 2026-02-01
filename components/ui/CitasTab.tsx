@@ -1,6 +1,6 @@
 'use client';
 
-interface Appointment {
+export interface Appointment {
   id: number;
   patient_name?: string;
   scheduled_date: string;
@@ -69,8 +69,8 @@ export default function CitasTab({ appointments }: Props) {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusStyle(cita.status)}`}>
-                        {cita.status === 'pending' ? 'Pendiente' : 
-                         cita.status === 'completed' ? 'Completada' : cita.status}
+                        {cita.status === 'pending' ? 'Pendiente' :
+                          cita.status === 'completed' ? 'Completada' : cita.status}
                       </span>
                     </td>
                   </tr>

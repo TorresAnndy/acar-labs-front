@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import ServiciosTab from './components/ServiciosTab';
-import CitasTab from './components/CitasTab';
+import ServiciosTab from '@/components/ui/ServiciosTab';
+import CitasTab, { Appointment } from '@/components/ui/CitasTab';
 
 interface Clinic {
     id: number;
@@ -43,16 +42,6 @@ interface Service {
     name: string;
     description: string;
     price: number;
-}
-
-interface Appointment {
-    id: number;
-    patient_name: string;
-    date: string;
-    time: string;
-    service: string;
-    status: string;
-    [key: string]: any;
 }
 
 interface LabResult {
@@ -543,12 +532,12 @@ export default function ClinicDetailsPage() {
                                             <h2 className="text-3xl font-bold text-gray-900 mb-2">
                                                 Gestión de Citas
                                             </h2>
-                                            
+
                                             <p className="text-gray-600">
                                                 Administra las solicitudes y agenda de {clinic?.name}
                                             </p>
                                         </div>
-                                        
+
 
                                         {/* Botón opcional por si quieres agregar funcionalidad de crear cita luego */}
                                         <button className="inline-flex items-center justify-center px-5 py-2.5 bg-[#003366] text-white font-medium rounded-lg hover:bg-[#00509e] transition-colors shadow-sm">
