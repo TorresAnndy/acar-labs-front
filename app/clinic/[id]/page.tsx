@@ -548,6 +548,7 @@ export default function ClinicDetailsPage() {
                                                 Administra las solicitudes y agenda de {clinic?.name}
                                             </p>
                                         </div>
+                                        
 
                                         {/* Botón opcional por si quieres agregar funcionalidad de crear cita luego */}
                                         <button className="inline-flex items-center justify-center px-5 py-2.5 bg-[#003366] text-white font-medium rounded-lg hover:bg-[#00509e] transition-colors shadow-sm">
