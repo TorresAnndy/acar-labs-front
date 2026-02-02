@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
@@ -255,7 +256,7 @@ export default function ClinicDetailsPage() {
                             }`}
                         title={!sidebarOpen ? 'Home' : ''}
                     >
-                        <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 9l9-18" />
                         </svg>
                         {sidebarOpen && <span>Home</span>}
@@ -269,7 +270,7 @@ export default function ClinicDetailsPage() {
                             }`}
                         title={!sidebarOpen ? 'Citas' : ''}
                     >
-                        <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         {sidebarOpen && <span>Citas</span>}
@@ -283,7 +284,7 @@ export default function ClinicDetailsPage() {
                             }`}
                         title={!sidebarOpen ? 'Servicios' : ''}
                     >
-                        <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 12a5 5 0 1110 0A5 5 0 017 12z" />
                         </svg>
                         {sidebarOpen && <span>Servicios</span>}
@@ -297,7 +298,7 @@ export default function ClinicDetailsPage() {
                             }`}
                         title={!sidebarOpen ? 'Laboratorio' : ''}
                     >
-                        <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.452a6 6 0 00-3.86.454l-.312.049a6 6 0 00-3.86-.454l-2.387.452a2 2 0 00-1.022.547m19.5-3.757l-23.5 3.757" />
                         </svg>
                         {sidebarOpen && <span>Laboratorio</span>}
@@ -311,7 +312,7 @@ export default function ClinicDetailsPage() {
                             }`}
                         title={!sidebarOpen ? 'Facturas' : ''}
                     >
-                        <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                         {sidebarOpen && <span>Facturas</span>}
@@ -326,7 +327,7 @@ export default function ClinicDetailsPage() {
                                 }`}
                             title={!sidebarOpen ? 'Empleados' : ''}
                         >
-                            <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM18.5 20H20v-2a3 3 0 00-.5-1.5M5 20v-2a3 3 0 015.856-1.487M7 10a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             {sidebarOpen && <span>Empleados</span>}
@@ -342,7 +343,7 @@ export default function ClinicDetailsPage() {
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all font-medium"
                         title={!sidebarOpen ? 'Cerrar' : ''}
                     >
-                        <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                         {sidebarOpen && <span>Cerrar</span>}
@@ -353,7 +354,7 @@ export default function ClinicDetailsPage() {
             {/* Main Content Area */}
             <div className="flex-1 overflow-y-auto flex flex-col">
                 {/* Professional Clinic Header */}
-                <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#00509e] text-white flex-shrink-0">
+                <div className="bg-linear-to-r from-[#003366] via-[#004080] to-[#00509e] text-white shrink-0">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                         <div className="flex items-start justify-between mb-8">
                             <div>

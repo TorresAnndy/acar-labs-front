@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -58,7 +59,6 @@ function CreateAppointmentContent() {
                 alert("¡Cita agendada con éxito!");
                 router.push('/servicios');
             } else {
-                // Manejo de errores específicos de validación de Laravel
                 setError(res.message || "Error al procesar la cita");
             }
         } catch (err) {

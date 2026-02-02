@@ -116,7 +116,7 @@ export default function ProfilePage() {
 
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                     {/* Header Background */}
-                    <div className="h-32 bg-gradient-to-r from-[#003366] to-[#00509e]"></div>
+                    <div className="h-32 bg-linear-to-r from-[#003366] to-[#00509e]"></div>
 
                     <div className="px-6 sm:px-8 pb-8">
                         {/* Avatar and Name */}
@@ -163,7 +163,7 @@ export default function ProfilePage() {
                                                     // Bloqueo de clic si no está activa
                                                     onClick={() => isActive && window.open(`/clinic/${employee.clinic.id}`, '_blank')}
                                                     className={`block p-4 border rounded-lg transition-all ${isActive
-                                                        ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:shadow-lg hover:border-blue-400 cursor-pointer"
+                                                        ? "bg-linear-to-r from-blue-50 to-indigo-50 border-blue-200 hover:shadow-lg hover:border-blue-400 cursor-pointer"
                                                         : "bg-gray-100 border-gray-200 cursor-not-allowed grayscale opacity-80"
                                                         }`}
                                                 >
@@ -188,7 +188,7 @@ export default function ProfilePage() {
                                                             </div>
                                                         </div>
                                                         {isActive && (
-                                                            <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <svg className="w-5 h-5 text-blue-400 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                             </svg>
                                                         )}

@@ -51,7 +51,7 @@ const stats = [
 
 export default function Home() {
   return (
-    <div className="bg-[var(--bg-page)]">
+    <div className="bg-(--bg-page)">
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-linear-to-br from-[#003366] via-[#004C7F] to-[#4A708B]">
         {/* Decorative Pattern */}
@@ -119,15 +119,15 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-[var(--bg-surface)] border-y border-[var(--border-color)]">
+      <section className="py-16 bg-(--bg-surface) border-y border-(--border-color)">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-[var(--btn-primary-bg)]">
+                <div className="text-3xl sm:text-4xl font-bold text-(--btn-primary-bg)">
                   {stat.value}
                 </div>
-                <div className="mt-2 text-sm text-[var(--text-secondary)]">
+                <div className="mt-2 text-sm text-(--text-secondary)">
                   {stat.label}
                 </div>
               </div>
@@ -140,10 +140,10 @@ export default function Home() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-[var(--text-heading)]">
+            <h2 className="text-3xl font-bold text-(--text-heading)">
               Servicios Populares
             </h2>
-            <p className="mt-3 text-[var(--text-secondary)] max-w-2xl mx-auto">
+            <p className="mt-3 text-(--text-secondary) max-w-2xl mx-auto">
               Explora los servicios más buscados por nuestros usuarios
             </p>
           </div>
@@ -153,15 +153,15 @@ export default function Home() {
               <Link
                 key={service.id}
                 href={`/servicios?q=${encodeURIComponent(service.name)}`}
-                className="group flex flex-col items-center p-6 bg-white rounded-2xl border border-[var(--border-color)] hover:border-[var(--btn-primary-bg)] transition-all hover:shadow-lg"
+                className="group flex flex-col items-center p-6 bg-white rounded-2xl border border-(--border-color) hover:border-(--btn-primary-bg) transition-all hover:shadow-lg"
               >
                 <span className="text-4xl mb-3 group-hover:scale-110 transition-transform">
                   {service.icon}
                 </span>
-                <span className="text-sm font-medium text-[var(--text-heading)] text-center">
+                <span className="text-sm font-medium text-(--text-heading) text-center">
                   {service.name}
                 </span>
-                <span className="text-xs text-[var(--text-secondary)] mt-1">
+                <span className="text-xs text-(--text-secondary) mt-1">
                   {service.count} clínicas
                 </span>
               </Link>
@@ -171,20 +171,20 @@ export default function Home() {
       </section>
 
       {/* Featured Clinics Section */}
-      <section className="py-20 bg-[var(--bg-surface)]">
+      <section className="py-20 bg-(--bg-surface)">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
             <div>
-              <h2 className="text-3xl font-bold text-[var(--text-heading)]">
+              <h2 className="text-3xl font-bold text-(--text-heading)">
                 Clínicas Destacadas
               </h2>
-              <p className="mt-2 text-[var(--text-secondary)]">
+              <p className="mt-2 text-(--text-secondary)">
                 Las mejores opciones verificadas por ACAR Labs
               </p>
             </div>
             <Link
               href="/clinicas"
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-[var(--link-color)] border border-[var(--link-color)] rounded-full hover:bg-[var(--btn-primary-bg)] hover:text-[var(--btn-text)] hover:border-[var(--btn-primary-bg)] transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-(--link-color) border border-(--link-color) rounded-full hover:bg-(--btn-primary-bg) hover:text-(--btn-text) hover:border-(--btn-primary-bg) transition-all"
             >
               Ver todas
               <svg fill="none" stroke="currentColor" className="w-4 h-4" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m9 5 7 7-7 7" strokeWidth={2} /></svg>
@@ -196,7 +196,7 @@ export default function Home() {
               <Link
                 key={clinic.id}
                 href={`/clinicas/${clinic.id}`}
-                className="group block bg-white rounded-2xl overflow-hidden border border-[var(--border-color)] hover:border-[var(--btn-primary-bg)] transition-all duration-300 hover:shadow-xl"
+                className="group block bg-white rounded-2xl overflow-hidden border border-(--border-color) hover:border-(--btn-primary-bg) transition-all duration-300 hover:shadow-xl"
               >
                 {/* Image Placeholder */}
                 <div className="relative h-40 bg-linear-to-br from-[#003366] to-[#4A708B]">
@@ -221,7 +221,7 @@ export default function Home() {
                   {/* Featured Badge for first item */}
                   {index === 0 && (
                     <div className="absolute top-4 left-4">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--status-success)] text-white text-xs font-semibold rounded-full">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-(--status-success) text-white text-xs font-semibold rounded-full">
                         <svg fill="currentColor" className="w-3 h-3" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292z" /></svg>
                         Destacado
                       </span>
@@ -231,25 +231,25 @@ export default function Home() {
 
                 {/* Content */}
                 <div className="p-5">
-                  <h3 className="text-lg font-bold text-[var(--text-heading)] group-hover:text-[var(--link-hover)] transition-colors line-clamp-1">
+                  <h3 className="text-lg font-bold text-(--text-heading) group-hover:text-(--link-hover) transition-colors line-clamp-1">
                     {clinic.name}
                   </h3>
 
                   {/* Location */}
-                  <div className="flex items-center gap-2 mt-2 text-sm text-[var(--text-secondary)]">
-                    <svg fill="none" stroke="currentColor" className="w-4 h-4 shrink-0 text-[var(--btn-secondary-bg)]" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657 13.414 20.9a2 2 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0" strokeWidth={2} /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0" strokeWidth={2} /></svg>
+                  <div className="flex items-center gap-2 mt-2 text-sm text-(--text-secondary)">
+                    <svg fill="none" stroke="currentColor" className="w-4 h-4 shrink-0 text-(--btn-secondary-bg)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657 13.414 20.9a2 2 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0" strokeWidth={2} /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0" strokeWidth={2} /></svg>
                     <span className="line-clamp-1">
                       {clinic.address.city}, {clinic.address.province}
                     </span>
                   </div>
 
                   {/* CTA */}
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-[var(--border-color)]">
-                    <span className="text-sm font-medium text-[var(--link-color)]">
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-(--border-color)">
+                    <span className="text-sm font-medium text-(--link-color)">
                       Ver servicios
                     </span>
-                    <div className="w-8 h-8 rounded-full bg-[var(--bg-surface)] flex items-center justify-center group-hover:bg-[var(--btn-primary-bg)] transition-colors">
-                      <svg fill="none" stroke="currentColor" className="w-4 h-4 text-[var(--link-color)] group-hover:text-white transition-colors" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m9 5 7 7-7 7" strokeWidth={2} /></svg>
+                    <div className="w-8 h-8 rounded-full bg-(--bg-surface) flex items-center justify-center group-hover:bg-(--btn-primary-bg) transition-colors">
+                      <svg fill="none" stroke="currentColor" className="w-4 h-4 text-(--link-color) group-hover:text-white transition-colors" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m9 5 7 7-7 7" strokeWidth={2} /></svg>
                     </div>
                   </div>
                 </div>
@@ -263,10 +263,10 @@ export default function Home() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-[var(--text-heading)]">
+            <h2 className="text-3xl font-bold text-(--text-heading)">
               ¿Por qué elegir ACAR Labs?
             </h2>
-            <p className="mt-3 text-[var(--text-main)] opacity-70 max-w-2xl mx-auto">
+            <p className="mt-3 text-(--text-main) opacity-70 max-w-2xl mx-auto">
               La plataforma más completa para gestionar tu salud en Ecuador
             </p>
           </div>
@@ -295,9 +295,7 @@ export default function Home() {
             />
             <FeatureCard
               icon={
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
+                <svg fill="none" stroke="currentColor" className="w-7 h-7" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.03 2.03 0 0 1 18 14.158V11a6 6 0 0 0-4-5.659V5a2 2 0 1 0-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9" strokeWidth={2} /></svg>
               }
               title="Recordatorios"
               description="Recibe notificaciones automáticas para no olvidar tus citas. Te avisamos con anticipación por email y SMS."

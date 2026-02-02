@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -68,7 +69,7 @@ export default function ServiceCard({ service }: { service: Service }) {
                 {service.clinic_name}
             </p>
 
-            <p className="mt-3 text-sm text-gray-500 line-clamp-2 min-h-[40px]">
+            <p className="mt-3 text-sm text-gray-500 line-clamp-2 min-h-10">
                 {service.description || 'Descripción no disponible.'}
             </p>
 
