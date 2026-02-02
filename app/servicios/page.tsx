@@ -161,7 +161,7 @@ export default function ServiciosPage() {
 
                             {/* Exam Type Filter */}
                             <div className="mb-6 relative" ref={dropdownRef}>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Tipo de Examen</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Tipo de Servicio</label>
                                 <button
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                     className="w-full px-4 py-3 bg-gray-50 hover:bg-white border border-gray-200 rounded-xl text-sm shadow-sm flex justify-between items-center transition-all focus:ring-2 focus:ring-[#003366]/10"
