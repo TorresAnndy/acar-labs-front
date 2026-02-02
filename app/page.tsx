@@ -1,35 +1,42 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "@/components/ui/SearchBar";
 import FeatureCard from "@/components/ui/FeatureCard";
 
-// Mock data for featured clinics (will be replaced with API data)
-const mockClinics = [
-  {
-    id: 1,
-    name: "Hospital Metropolitano",
-    ruc: "1790123456001",
-    address: { city: "Quito", province: "Pichincha" },
-  },
-  {
-    id: 2,
-    name: "Clínica Santa María",
-    ruc: "1790234567001",
-    address: { city: "Guayaquil", province: "Guayas" },
-  },
-  {
-    id: 3,
-    name: "Laboratorio CliniLab",
-    ruc: "1790345678001",
-    address: { city: "Cuenca", province: "Azuay" },
-  },
-  {
-    id: 4,
-    name: "Centro Médico Integral",
-    ruc: "1790456789001",
-    address: { city: "Quito", province: "Pichincha" },
-  },
-];
+// Helper helper to fetch clinics
+async function getFeaturedClinics() {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    // Fetch data with revalidation to keep it somewhat fresh but performant
+    const res = await fetch(`${apiUrl}/public/clinics`, { next: { revalidate: 60 } });
+
+    if (!res.ok) {
+      // Si falla, retornamos arreglos vacíos o mock data de contingencia si prefieres
+      console.error(`Error fetching clinics: ${res.status}`);
+      return [];
+    }
+
+    const data = await res.json();
+    let clinicsData: any[] = [];
+
+    // Normalización de la respuesta según lo visto en clinicas/page.tsx
+    if (Array.isArray(data?.data)) clinicsData = data.data;
+    else if (Array.isArray(data)) clinicsData = data;
+    else if (Array.isArray(data?.clinics)) clinicsData = data.clinics;
+
+    // Tomamos las primeras 4 para mostrarlas como destacadas
+    return clinicsData.slice(0, 4).map((clinic) => ({
+      id: clinic.id,
+      name: clinic.name,
+      address: clinic.address || { city: "Ubicación", province: "General" }
+    }));
+
+  } catch (error) {
+    console.error("Failed to fetch featured clinics:", error);
+    return [];
+  }
+}
 
 // Mock data for popular services
 const popularServices = [
@@ -49,7 +56,9 @@ const stats = [
   { value: "98%", label: "Satisfacción" },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const featuredClinics = await getFeaturedClinics();
+
   return (
     <div className="bg-(--bg-page)">
       {/* Hero Section */}
@@ -192,69 +201,75 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mockClinics.map((clinic, index) => (
-              <Link
-                key={clinic.id}
-                href={`/clinicas/${clinic.id}`}
-                className="group block bg-white rounded-2xl overflow-hidden border border-(--border-color) hover:border-(--btn-primary-bg) transition-all duration-300 hover:shadow-xl"
-              >
-                {/* Image Placeholder */}
-                <div className="relative h-40 bg-linear-to-br from-[#003366] to-[#4A708B]">
-                  {/* Decorative Pattern */}
-                  <div className="absolute inset-0 opacity-[0.08]">
-                    <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100"><path d="M0 0h100v100H0z" fill={`url(#grid-${clinic.id})`} /></svg>
-                  </div>
-
-                  {/* Medical Cross Icon */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <svg
-                        className="w-8 h-8 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
-                      </svg>
+            {featuredClinics.length > 0 ? (
+              featuredClinics.map((clinic, index) => (
+                <Link
+                  key={clinic.id}
+                  href={`/clinic/${clinic.id}`} // Updated path to match file structure [id]
+                  className="group block bg-white rounded-2xl overflow-hidden border border-(--border-color) hover:border-(--btn-primary-bg) transition-all duration-300 hover:shadow-xl"
+                >
+                  {/* Image Placeholder */}
+                  <div className="relative h-40 bg-linear-to-br from-[#003366] to-[#4A708B]">
+                    {/* Decorative Pattern */}
+                    <div className="absolute inset-0 opacity-[0.08]">
+                      <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100"><path d="M0 0h100v100H0z" fill={`url(#grid-${clinic.id})`} /></svg>
                     </div>
+
+                    {/* Medical Cross Icon */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <svg
+                          className="w-8 h-8 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Featured Badge for first item */}
+                    {index === 0 && (
+                      <div className="absolute top-4 left-4">
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-(--status-success) text-white text-xs font-semibold rounded-full">
+                          <svg fill="currentColor" className="w-3 h-3" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292z" /></svg>
+                          Destacado
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Featured Badge for first item */}
-                  {index === 0 && (
-                    <div className="absolute top-4 left-4">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-(--status-success) text-white text-xs font-semibold rounded-full">
-                        <svg fill="currentColor" className="w-3 h-3" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292z" /></svg>
-                        Destacado
+                  {/* Content */}
+                  <div className="p-5">
+                    <h3 className="text-lg font-bold text-(--text-heading) group-hover:text-(--link-hover) transition-colors line-clamp-1">
+                      {clinic.name}
+                    </h3>
+
+                    {/* Location */}
+                    <div className="flex items-center gap-2 mt-2 text-sm text-(--text-secondary)">
+                      <svg fill="none" stroke="currentColor" className="w-4 h-4 shrink-0 text-(--btn-secondary-bg)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657 13.414 20.9a2 2 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0" strokeWidth={2} /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0" strokeWidth={2} /></svg>
+                      <span className="line-clamp-1">
+                        {clinic.address.city}, {clinic.address.province}
                       </span>
                     </div>
-                  )}
-                </div>
 
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="text-lg font-bold text-(--text-heading) group-hover:text-(--link-hover) transition-colors line-clamp-1">
-                    {clinic.name}
-                  </h3>
-
-                  {/* Location */}
-                  <div className="flex items-center gap-2 mt-2 text-sm text-(--text-secondary)">
-                    <svg fill="none" stroke="currentColor" className="w-4 h-4 shrink-0 text-(--btn-secondary-bg)" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657 13.414 20.9a2 2 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0" strokeWidth={2} /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0" strokeWidth={2} /></svg>
-                    <span className="line-clamp-1">
-                      {clinic.address.city}, {clinic.address.province}
-                    </span>
-                  </div>
-
-                  {/* CTA */}
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-(--border-color)">
-                    <span className="text-sm font-medium text-(--link-color)">
-                      Ver servicios
-                    </span>
-                    <div className="w-8 h-8 rounded-full bg-(--bg-surface) flex items-center justify-center group-hover:bg-(--btn-primary-bg) transition-colors">
-                      <svg fill="none" stroke="currentColor" className="w-4 h-4 text-(--link-color) group-hover:text-white transition-colors" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m9 5 7 7-7 7" strokeWidth={2} /></svg>
+                    {/* CTA */}
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-(--border-color)">
+                      <span className="text-sm font-medium text-(--link-color)">
+                        Ver servicios
+                      </span>
+                      <div className="w-8 h-8 rounded-full bg-(--bg-surface) flex items-center justify-center group-hover:bg-(--btn-primary-bg) transition-colors">
+                        <svg fill="none" stroke="currentColor" className="w-4 h-4 text-(--link-color) group-hover:text-white transition-colors" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m9 5 7 7-7 7" strokeWidth={2} /></svg>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-1 sm:col-span-2 lg:col-span-4 text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
+                <p className="text-gray-500">No hay clínicas destacadas por el momento.</p>
+              </div>
+            )}
           </div>
         </div>
       </section>
