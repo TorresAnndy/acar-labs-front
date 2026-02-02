@@ -112,7 +112,7 @@ export default function ServiciosPage() {
                     </svg>
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
+                <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 animate-fade-in-up">
                         Servicios Médicos
                     </h1>
@@ -141,7 +141,7 @@ export default function ServiciosPage() {
                 </div>
             </section>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20">
+            <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20">
                 <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8 flex flex-col lg:flex-row gap-8 min-h-[500px]">
 
                     {/* Sidebar Filters */}
