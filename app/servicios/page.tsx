@@ -106,10 +106,13 @@ export default function ServiciosPage() {
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Hero Section - Matching Nosotros Page Style */}
             <section className="relative bg-gradient-to-br from-[#003366] to-[#00509e] pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden">
-                <div className="absolute inset-0 opacity-10">
-                    <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" />
-                    </svg>
+                <div className="absolute inset-0 opacity-50">
+                    <Image
+                        src="/images/services/Banner.avif"
+                        alt="Decorative pattern"
+                        fill
+                        className="object-cover"
+                    />
                 </div>
 
                 <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
