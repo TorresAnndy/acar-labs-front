@@ -3,13 +3,23 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Popup from '@/components/ui/Popup';
 
 export default function RegisterPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
-    const [success, setSuccess] = useState(false);
+
+    // Estado del Popup
+    const [popup, setPopup] = useState<{
+        isOpen: boolean;
+        type: 'success' | 'error';
+        message: string;
+    }>({
+        isOpen: false,
+        type: 'success',
+        message: ''
+    });
 
     const [formData, setFormData] = useState({
         name: '',
@@ -24,36 +34,41 @@ export default function RegisterPage() {
             ...prev,
             [name]: value
         }));
-        setError(null);
+    };
+
+    const handleClosePopup = () => {
+        setPopup(prev => ({ ...prev, isOpen: false }));
+        if (popup.type === 'success') {
+            router.push('/login');
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setError(null);
 
         // Validation
         if (!formData.name.trim()) {
-            setError('El nombre es requerido');
+            setPopup({ isOpen: true, type: 'error', message: 'El nombre es requerido' });
             return;
         }
         if (!formData.email.trim()) {
-            setError('El email es requerido');
+            setPopup({ isOpen: true, type: 'error', message: 'El email es requerido' });
             return;
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            setError('El email no es válido');
+            setPopup({ isOpen: true, type: 'error', message: 'El email no es válido' });
             return;
         }
         if (!formData.password) {
-            setError('La contraseña es requerida');
+            setPopup({ isOpen: true, type: 'error', message: 'La contraseña es requerida' });
             return;
         }
         if (formData.password.length < 6) {
-            setError('La contraseña debe tener al menos 6 caracteres');
+            setPopup({ isOpen: true, type: 'error', message: 'La contraseña debe tener al menos 6 caracteres' });
             return;
         }
         if (formData.password !== formData.passwordConfirm) {
-            setError('Las contraseñas no coinciden');
+            setPopup({ isOpen: true, type: 'error', message: 'Las contraseñas no coinciden' });
             return;
         }
 
@@ -79,7 +94,12 @@ export default function RegisterPage() {
                 throw new Error(data.message || 'Error al registrarse');
             }
 
-            setSuccess(true);
+            setPopup({
+                isOpen: true,
+                type: 'success',
+                message: '¡Registro exitoso! Ya puedes iniciar sesión.'
+            });
+
             setFormData({
                 name: '',
                 email: '',
@@ -87,12 +107,12 @@ export default function RegisterPage() {
                 passwordConfirm: '',
             });
 
-            // Redirect to login after 2 seconds
-            setTimeout(() => {
-                router.push('/login');
-            }, 2000);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
+            setPopup({
+                isOpen: true,
+                type: 'error',
+                message: err instanceof Error ? err.message : 'Error desconocido'
+            });
         } finally {
             setLoading(false);
         }
@@ -100,6 +120,12 @@ export default function RegisterPage() {
 
     return (
         <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50/30 flex items-center justify-center px-4 py-12">
+            <Popup
+                isOpen={popup.isOpen}
+                type={popup.type}
+                message={popup.message}
+                onClose={handleClosePopup}
+            />
             <div className="w-full max-w-md">
                 {/* Header */}
                 <div className="text-center mb-8">
@@ -111,44 +137,9 @@ export default function RegisterPage() {
                     </p>
                 </div>
 
-                {/* Success Message */}
-                {success && (
-                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <div className="flex items-center gap-3">
-                            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                            <div>
-                                <p className="text-sm font-medium text-green-800">
-                                    ¡Registro exitoso!
-                                </p>
-                                <p className="text-xs text-green-700">
-                                    Redirigiendo al inicio de sesión...
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Error Message */}
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <div className="flex items-start gap-3">
-                            <svg fill="currentColor" className="w-5 h-5 text-red-600 shrink-0 mt-0.5" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16M8.707 7.293a1 1 0 0 0-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 1 0 1.414 1.414L10 11.414l1.293 1.293a1 1 0 0 0 1.414-1.414L11.414 10l1.293-1.293a1 1 0 0 0-1.414-1.414L10 8.586z" clipRule="evenodd"/></svg>
-                            <div>
-                                <p className="text-sm font-medium text-red-800">
-                                    Error
-                                </p>
-                                <p className="text-sm text-red-700 mt-1">
-                                    {error}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8 space-y-6">
+
                     {/* Name Field */}
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-900 mb-2">
@@ -162,7 +153,7 @@ export default function RegisterPage() {
                             onChange={handleChange}
                             placeholder="Juan Pérez"
                             className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] transition-all"
-                            disabled={loading || success}
+                            disabled={loading}
                         />
                     </div>
 
@@ -179,7 +170,7 @@ export default function RegisterPage() {
                             onChange={handleChange}
                             placeholder="juan@ejemplo.com"
                             className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] transition-all"
-                            disabled={loading || success}
+                            disabled={loading}
                         />
                     </div>
 
@@ -197,13 +188,13 @@ export default function RegisterPage() {
                                 onChange={handleChange}
                                 placeholder="••••••••"
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] transition-all pr-12"
-                                disabled={loading || success}
+                                disabled={loading}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                disabled={loading || success}
+                                disabled={loading}
                             >
                                 {showPassword ? (
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,27 +223,20 @@ export default function RegisterPage() {
                             onChange={handleChange}
                             placeholder="••••••••"
                             className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] transition-all"
-                            disabled={loading || success}
+                            disabled={loading}
                         />
                     </div>
 
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        disabled={loading || success}
+                        disabled={loading}
                         className="w-full bg-linear-to-r from-[#003366] to-[#00509e] text-white font-semibold py-2.5 rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         {loading ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                 Registrando...
-                            </>
-                        ) : success ? (
-                            <>
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                Registrado
                             </>
                         ) : (
                             'Crear Cuenta'
