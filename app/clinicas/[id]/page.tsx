@@ -81,6 +81,8 @@ export default function ClinicDetailPage() {
                 // Extract services from clinic
                 const servicesList = (foundClinic.services || []).map((service: any) => ({
                     ...service,
+                    clinic_id: foundClinic.id,
+                    clinic_name: foundClinic.name,
                     price: typeof service.price === 'string' ? parseFloat(service.price) : service.price
                 }));
                 setServices(servicesList);
