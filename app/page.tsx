@@ -205,7 +205,7 @@ export default async function Home() {
               featuredClinics.map((clinic, index) => (
                 <Link
                   key={clinic.id}
-                  href={`/clinic/${clinic.id}`} // Updated path to match file structure [id]
+                  href={`/clinicas/${clinic.id}`} // Updated path to match file structure [id]
                   className="group block bg-white rounded-2xl overflow-hidden border border-(--border-color) hover:border-(--btn-primary-bg) transition-all duration-300 hover:shadow-xl"
                 >
                   {/* Image Placeholder */}
