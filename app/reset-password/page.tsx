@@ -73,23 +73,7 @@ function ResetPasswordContent() {
             setLoading(true);
             const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-            // Using the requested route /reset-password
-            // Assuming it might need /v1.0 prefix based on project structure, 
-            // but user explicitly said "/reset-password" as the backend route.
-            // I will treat it as relative to the base URL which likely includes /v1.0 or adds it.
-            // However, sticking to the standard of this project I've seen in other files, 
-            // the base URL usually is just the host.
-            // Previous files used: `${apiUrl}/forgot-password` (before I fixed it to /v1.0)
-            // I will use `${apiUrl}/v1.0/reset-password` if the pattern holds, but user text is specific.
-            // User said: "la ruta del backend es: /reset-password". 
-            // I will try to be safe and use `${apiUrl}/reset-password` first or match the previous fix.
-            // Actually, in the previous turn I changed forgot-password to `/v1.0/forgot-password`.
-            // It is highly probable reset is also v1.0. I will assume standard REST consistency but keep user instruction in mind. 
-            // If the user meant the literal path relative to host is /reset-password, I should use that.
-            // But let's look at `BACKEND.md` again provided previously... it only listed /forgot-password in v1.0.
-            // I will use `${apiUrl}/v1.0/reset-password` to be consistent with my previous fix, assuming the user is describing the *feature* route name.
-
-            const response = await fetch(`${apiUrl}/v1.0/reset-password`, {
+            const response = await fetch(`${apiUrl}/reset-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
