@@ -16,7 +16,7 @@ function ServiciosContent() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
     const [selectedExams, setSelectedExams] = useState<string[]>([]);
-    
+
     // Filtros de Ubicación
     const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
     const [selectedCity, setSelectedCity] = useState<string | null>(null);
@@ -116,7 +116,7 @@ function ServiciosContent() {
             if (selectedPrice === 'low') matchesPrice = price < 50;
             if (selectedPrice === 'medium') matchesPrice = price >= 50 && price < 150;
             if (selectedPrice === 'high') matchesPrice = price >= 150;
-            
+
             // Location Filters
             const matchesProvince = !selectedProvince || service.province === selectedProvince;
             const matchesCity = !selectedCity || service.city === selectedCity;
@@ -195,11 +195,11 @@ function ServiciosContent() {
                                 </svg>
                                 Filtros
                             </h3>
-                            
+
                             {/* Province Filter */}
                             <div className="mb-6">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Provincia</label>
-                                <select 
+                                <select
                                     className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#003366]/10 cursor-pointer"
                                     value={selectedProvince || ''}
                                     onChange={(e) => {
@@ -217,7 +217,7 @@ function ServiciosContent() {
                             {/* City Filter */}
                             <div className="mb-6">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Ciudad</label>
-                                <select 
+                                <select
                                     className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#003366]/10 cursor-pointer disabled:opacity-50"
                                     value={selectedCity || ''}
                                     onChange={(e) => setSelectedCity(e.target.value || null)}
@@ -285,14 +285,6 @@ function ServiciosContent() {
                                             <span className="text-sm text-gray-700">{option.label}</span>
                                         </label>
                                     ))}
-                                    {selectedPrice && (
-                                        <button
-                                            onClick={() => setSelectedPrice(null)}
-                                            className="text-xs text-red-500 font-semibold hover:underline mt-2 flex items-center gap-1"
-                                        >
-                                            Limpiar filtro de precio
-                                        </button>
-                                    )}
                                 </div>
                             </div>
                         </div>
@@ -302,10 +294,20 @@ function ServiciosContent() {
                     <div className="flex-1">
 
                         {/* Active Filters Summary */}
-                        {(selectedExams.length > 0 || selectedProvince || selectedCity) && (
+                        {(selectedExams.length > 0 || selectedProvince || selectedCity || selectedPrice) && (
                             <div className="mb-6">
                                 <h4 className="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wider">Filtros Activos</h4>
                                 <div className="flex flex-wrap gap-2">
+                                    {selectedPrice && (
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-full border border-purple-100 animate-fade-in">
+                                            {selectedPrice === 'low' ? 'Económico' : selectedPrice === 'medium' ? 'Estándar' : 'Premium'}
+                                            <button onClick={() => setSelectedPrice(null)} className="hover:text-red-500 transition-colors">
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </span>
+                                    )}
                                     {selectedProvince && (
                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-100 animate-fade-in">
                                             {selectedProvince}
@@ -326,7 +328,7 @@ function ServiciosContent() {
                                             </button>
                                         </span>
                                     )}
-                                    
+
                                     {selectedExams.map(exam => (
                                         <span key={exam} className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-[#003366] text-xs font-bold rounded-full border border-blue-100 animate-fade-in">
                                             {exam}
@@ -338,7 +340,7 @@ function ServiciosContent() {
                                         </span>
                                     ))}
                                     <button
-                                        onClick={() => { setSelectedExams([]); setSelectedProvince(null); setSelectedCity(null); }}
+                                        onClick={() => { setSelectedExams([]); setSelectedProvince(null); setSelectedCity(null); setSelectedPrice(null); }}
                                         className="text-xs text-gray-500 hover:text-[#003366] font-medium underline px-2"
                                     >
                                         Limpiar todos
