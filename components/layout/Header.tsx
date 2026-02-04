@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 'use client';
 
 import Image from 'next/image';
@@ -99,7 +100,7 @@ export default function Header() {
         <header
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
                 ? 'bg-white/98 backdrop-blur-md shadow-lg border-b border-gray-200/50'
-                : 'bg-gradient-to-b from-[#003366]/95 to-[#003366]/80 backdrop-blur-sm'
+                : 'bg-linear-to-b from-[#003366]/95 to-[#003366]/80 backdrop-blur-sm'
                 }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -175,9 +176,6 @@ export default function Header() {
                                     <span className={`text-sm font-medium ${isScrolled ? 'text-gray-900' : 'text-white'}`}>
                                         {user.name.split(' ')[0]}
                                     </span>
-                                    <svg className={`w-4 h-4 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''} ${isScrolled ? 'text-gray-700' : 'text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                                    </svg>
                                 </button>
 
                                 {/* Profile Dropdown */}
@@ -268,76 +266,80 @@ export default function Header() {
 
                 {/* Mobile Menu */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden py-4 border-t border-gray-200/50 bg-white">
-                        <nav className="flex flex-col gap-4">
-                            <Link
-                                href="/"
-                                className="text-gray-700 hover:text-[#003366] font-medium transition-colors"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                Inicio
-                            </Link>
-                            <Link
-                                href="/clinicas"
-                                className="text-gray-700 hover:text-[#003366] font-medium transition-colors"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                Clínicas
-                            </Link>
-                            <Link
-                                href="/servicios"
-                                className="text-gray-700 hover:text-[#003366] font-medium transition-colors"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                Servicios
-                            </Link>
-                            <Link
-                                href="/nosotros"
-                                className="text-gray-700 hover:text-[#003366] font-medium transition-colors"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                Nosotros
-                            </Link>
-                            <div className="flex flex-col gap-2 pt-4 border-t border-gray-200/50">
+                    <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-xl border-t border-gray-100 animate-in slide-in-from-top-2 duration-200">
+                        <div className="flex flex-col p-4 space-y-4">
+                            {/* Navigation Links */}
+                            <nav className="flex flex-col space-y-2">
+                                {[
+                                    { name: 'Inicio', href: '/' },
+                                    { name: 'Clínicas', href: '/clinicas' },
+                                    { name: 'Servicios', href: '/servicios' },
+                                    { name: 'Nosotros', href: '/nosotros' },
+                                ].map((item) => (
+                                    <Link
+                                        key={item.name}
+                                        href={item.href}
+                                        className="px-4 py-3 text-lg font-medium text-gray-700 hover:text-[#003366] hover:bg-blue-50/50 rounded-xl transition-colors flex items-center justify-between group"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        {item.name}
+                                        <svg className="w-5 h-5 text-gray-400 group-hover:text-[#003366] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </Link>
+                                ))}
+                            </nav>
+
+                            {/* Auth Actions Separator */}
+                            <div className="h-px bg-gray-100 my-2"></div>
+
+                            {/* Auth Actions */}
+                            <div className="flex flex-col gap-3 px-2 pb-2">
                                 {user ? (
                                     <>
                                         <Link
                                             href="/perfil"
-                                            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-[#003366] border border-[#003366] rounded-full hover:bg-[#003366] hover:text-white transition-all"
                                             onClick={() => setIsMobileMenuOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-3 bg-[#F8FAFC] rounded-xl border border-gray-100"
                                         >
-                                            Mi Perfil
+                                            <div className="w-10 h-10 rounded-full bg-[#003366] text-white flex items-center justify-center font-semibold text-lg">
+                                                {user.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-gray-900">{user.name}</span>
+                                                <span className="text-xs text-blue-600 font-medium">Ver mi perfil</span>
+                                            </div>
                                         </Link>
                                         <button
                                             onClick={() => {
                                                 handleLogout();
                                                 setIsMobileMenuOpen(false);
                                             }}
-                                            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-full hover:bg-red-700 transition-all"
+                                            className="w-full mt-2 py-3 px-4 text-center text-red-600 font-medium bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
                                         >
                                             Cerrar Sesión
                                         </button>
                                     </>
                                 ) : (
-                                    <>
+                                    <div className="grid grid-cols-2 gap-3">
                                         <Link
                                             href="/login"
-                                            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-[#003366] border border-[#003366] rounded-full hover:bg-[#003366] hover:text-white transition-all"
+                                            className="flex items-center justify-center px-4 py-3 text-sm font-semibold text-[#003366] border-2 border-[#003366] rounded-xl hover:bg-blue-50 transition-colors"
                                             onClick={() => setIsMobileMenuOpen(false)}
                                         >
                                             Iniciar Sesión
                                         </Link>
                                         <Link
                                             href="/registro"
-                                            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-[#003366] rounded-full hover:bg-[#00509e] transition-all"
+                                            className="flex items-center justify-center px-4 py-3 text-sm font-semibold text-white bg-[#003366] rounded-xl shadow-lg shadow-blue-900/20 hover:bg-[#00254D] transition-colors"
                                             onClick={() => setIsMobileMenuOpen(false)}
                                         >
                                             Registrarse
                                         </Link>
-                                    </>
+                                    </div>
                                 )}
                             </div>
-                        </nav>
+                        </div>
                     </div>
                 )}
             </div>

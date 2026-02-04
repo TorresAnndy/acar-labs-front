@@ -48,12 +48,12 @@ export default function SearchBar({ variant = 'hero', onSearch }: SearchBarProps
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Buscar clínica, servicio..."
-                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[var(--border-color)] bg-white text-[var(--text-main)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--btn-primary-bg)] transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-(--border-color) bg-white text-(--text-main) placeholder:text-(--text-secondary) focus:outline-none focus:ring-2 focus:ring-(--btn-primary-bg) transition-all"
                     />
                 </div>
                 <button
                     type="submit"
-                    className="px-6 py-2.5 bg-[var(--btn-primary-bg)] text-[var(--btn-text)] font-medium rounded-lg hover:bg-[var(--btn-primary-hover)] transition-colors shadow-md"
+                    className="px-6 py-2.5 bg-(--btn-primary-bg) text-(--btn-text) font-medium rounded-lg hover:bg-(--btn-primary-hover) transition-colors shadow-md"
                 >
                     Buscar
                 </button>
@@ -71,7 +71,7 @@ export default function SearchBar({ variant = 'hero', onSearch }: SearchBarProps
                 <div className="relative flex-1">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2">
                         <svg
-                            className="w-5 h-5 text-[var(--brand-deep-blue)]"
+                            className="w-5 h-5 text-(--brand-deep-blue)"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -89,7 +89,7 @@ export default function SearchBar({ variant = 'hero', onSearch }: SearchBarProps
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="¿Qué servicio necesitas?"
-                        className="w-full pl-12 pr-4 py-4 rounded-xl border-0 bg-[var(--bg-surface)] text-[var(--text-main)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--btn-primary-bg)] transition-all text-lg"
+                        className="w-full pl-12 pr-4 py-4 rounded-xl border-0 bg-(--bg-surface) text-(--text-main) placeholder:text-(--text-secondary) focus:outline-none focus:ring-2 focus:ring-(--btn-primary-bg) transition-all text-lg"
                     />
                 </div>
 
@@ -97,7 +97,7 @@ export default function SearchBar({ variant = 'hero', onSearch }: SearchBarProps
                 <div className="relative flex-1">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2">
                         <svg
-                            className="w-5 h-5 text-[var(--btn-primary-bg)]"
+                            className="w-5 h-5 text-(--btn-primary-bg)"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -121,14 +121,14 @@ export default function SearchBar({ variant = 'hero', onSearch }: SearchBarProps
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                         placeholder="¿Dónde? (Ciudad o provincia)"
-                        className="w-full pl-12 pr-4 py-4 rounded-xl border-0 bg-[var(--bg-surface)] text-[var(--text-main)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--btn-primary-bg)] transition-all text-lg"
+                        className="w-full pl-12 pr-4 py-4 rounded-xl border-0 bg-(--bg-surface) text-(--text-main) placeholder:text-(--text-secondary) focus:outline-none focus:ring-2 focus:ring-(--btn-primary-bg) transition-all text-lg"
                     />
                 </div>
 
                 {/* Search Button */}
                 <button
                     type="submit"
-                    className="flex items-center justify-center gap-2 px-8 py-4 bg-[var(--btn-primary-bg)] text-[var(--btn-text)] font-semibold rounded-xl hover:bg-[var(--btn-primary-hover)] transition-all shadow-lg active:scale-[0.98]"
+                    className="flex items-center justify-center gap-2 px-8 py-4 bg-(--btn-primary-bg) text-(--btn-text) font-semibold rounded-xl hover:bg-(--btn-primary-hover) transition-all shadow-lg active:scale-[0.98]"
                 >
                     <svg
                         className="w-5 h-5"

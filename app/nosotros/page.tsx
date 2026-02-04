@@ -1,16 +1,17 @@
+import Link from 'next/link';
+import Image from 'next/image';
+
 export default function NosotrosPage() {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
-            <section className="relative bg-gradient-to-br from-[#003366] to-[#00509e] pt-24 pb-16 md:pt-32 md:pb-20">
-                <div className="absolute inset-0 opacity-10">
-                    <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <defs>
-                            <pattern id="about-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
-                                <circle cx="10" cy="10" r="2" fill="white" />
-                            </pattern>
-                        </defs>
-                        <rect width="100" height="100" fill="url(#about-pattern)" />
-                    </svg>
+        <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50/30">
+            <section className="relative bg-linear-to-br from-[#003366] to-[#00509e] pt-24 pb-16 md:pt-32 md:pb-20">
+                <div className="absolute inset-0 opacity-25">
+                    <Image
+                        src="/images/about-me/Banner.avif"
+                        alt="Decorative background"
+                        fill
+                        className="object-cover"
+                    />
                 </div>
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -65,7 +66,7 @@ export default function NosotrosPage() {
 
                     <div className="grid md:grid-cols-3 gap-8">
                         <div className="text-center">
-                            <div className="w-20 h-20 bg-gradient-to-br from-[#003366] to-[#00509e] rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="w-20 h-20 bg-linear-to-br from-[#003366] to-[#00509e] rounded-full flex items-center justify-center mx-auto mb-6">
                                 <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
@@ -77,7 +78,7 @@ export default function NosotrosPage() {
                         </div>
 
                         <div className="text-center">
-                            <div className="w-20 h-20 bg-gradient-to-br from-[#003366] to-[#00509e] rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="w-20 h-20 bg-linear-to-br from-[#003366] to-[#00509e] rounded-full flex items-center justify-center mx-auto mb-6">
                                 <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
@@ -89,7 +90,7 @@ export default function NosotrosPage() {
                         </div>
 
                         <div className="text-center">
-                            <div className="w-20 h-20 bg-gradient-to-br from-[#003366] to-[#00509e] rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="w-20 h-20 bg-linear-to-br from-[#003366] to-[#00509e] rounded-full flex items-center justify-center mx-auto mb-6">
                                 <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
@@ -124,27 +125,27 @@ export default function NosotrosPage() {
                 </div>
             </section>
 
-            <section className="bg-gradient-to-br from-[#003366] to-[#00509e] py-16">
+            <section className="bg-linear-to-br from-[#003366] to-[#00509e] py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                        Desarrollado por ACAR Studio
+                        Desarrollado por ACAR
                     </h2>
                     <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
                         Un equipo apasionado por crear soluciones tecnológicas que mejoran la vida de las personas
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a
+                        <Link
                             href="/contacto"
                             className="inline-flex items-center justify-center px-8 py-3 bg-white text-[#003366] font-semibold rounded-full hover:bg-gray-100 transition-all shadow-lg"
                         >
                             Contáctanos
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                             href="/clinicas"
                             className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-[#003366] transition-all"
                         >
                             Ver Clínicas
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </section>

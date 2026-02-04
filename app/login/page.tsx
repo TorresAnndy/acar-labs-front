@@ -1,15 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Popup from '@/components/ui/Popup';
 
 export default function LoginPage() {
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
-    const [success, setSuccess] = useState(false);
+
+    // Estado del Popup
+    const [popup, setPopup] = useState<{
+        isOpen: boolean;
+        type: 'success' | 'error';
+        message: string;
+    }>({
+        isOpen: false,
+        type: 'success',
+        message: ''
+    });
 
     const [formData, setFormData] = useState({
         email: '',
@@ -22,24 +30,29 @@ export default function LoginPage() {
             ...prev,
             [name]: value
         }));
-        setError(null);
+    };
+
+    const handleClosePopup = () => {
+        setPopup(prev => ({ ...prev, isOpen: false }));
+        if (popup.type === 'success') {
+            window.location.href = '/';
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setError(null);
 
         // Validation
         if (!formData.email.trim()) {
-            setError('El email es requerido');
+            setPopup({ isOpen: true, type: 'error', message: 'El email es requerido' });
             return;
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            setError('El email no es válido');
+            setPopup({ isOpen: true, type: 'error', message: 'El email no es válido' });
             return;
         }
         if (!formData.password) {
-            setError('La contraseña es requerida');
+            setPopup({ isOpen: true, type: 'error', message: 'La contraseña es requerida' });
             return;
         }
 
@@ -70,25 +83,36 @@ export default function LoginPage() {
                 localStorage.setItem('token_type', data.token_type || 'bearer');
             }
 
-            setSuccess(true);
+            setPopup({
+                isOpen: true,
+                type: 'success',
+                message: '¡Inicio de sesión exitoso! Redirigiendo...'
+            });
+
             setFormData({
                 email: '',
                 password: '',
             });
 
-            // Refresh page to reload header with user info
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 500);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
+            setPopup({
+                isOpen: true,
+                type: 'error',
+                message: err instanceof Error ? err.message : 'Error desconocido'
+            });
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 flex items-center justify-center px-4 py-12">
+        <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50/30 flex items-center justify-center px-4 py-12">
+            <Popup
+                isOpen={popup.isOpen}
+                type={popup.type}
+                message={popup.message}
+                onClose={handleClosePopup}
+            />
             <div className="w-full max-w-md">
                 {/* Header */}
                 <div className="text-center mb-8">
@@ -100,46 +124,9 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                {/* Success Message */}
-                {success && (
-                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <div className="flex items-center gap-3">
-                            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                            <div>
-                                <p className="text-sm font-medium text-green-800">
-                                    ¡Iniciando sesión!
-                                </p>
-                                <p className="text-xs text-green-700">
-                                    Redirigiendo...
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Error Message */}
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <div className="flex items-start gap-3">
-                            <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                            </svg>
-                            <div>
-                                <p className="text-sm font-medium text-red-800">
-                                    Error
-                                </p>
-                                <p className="text-sm text-red-700 mt-1">
-                                    {error}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8 space-y-6">
+
                     {/* Email Field */}
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
@@ -153,7 +140,7 @@ export default function LoginPage() {
                             onChange={handleChange}
                             placeholder="tu@ejemplo.com"
                             className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] transition-all"
-                            disabled={loading || success}
+                            disabled={loading}
                         />
                     </div>
 
@@ -171,23 +158,18 @@ export default function LoginPage() {
                                 onChange={handleChange}
                                 placeholder="••••••••"
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] transition-all pr-12"
-                                disabled={loading || success}
+                                disabled={loading}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                disabled={loading || success}
+                                disabled={loading}
                             >
                                 {showPassword ? (
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-4.803m5.596-3.856a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className='w-5 h-5' fill="none" viewBox="0 0 24 24"><g id="SVGRepo_iconCarrier" fill="currentColor"><path d="M4.496 7.44a15 15 0 0 0-2.307 2.04 3.68 3.68 0 0 0 0 5.04C3.917 16.391 7.19 19 12 19c1.296 0 2.48-.19 3.552-.502l-1.662-1.663A11 11 0 0 1 12 17c-4.033 0-6.812-2.18-8.341-3.837a1.68 1.68 0 0 1 0-2.326 13 13 0 0 1 2.273-1.96z" /><path d="M8.533 11.478q-.038.256-.039.522a3.5 3.5 0 0 0 4.022 3.461zm6.933.969-3.919-3.919q.22-.027.447-.028a3.5 3.5 0 0 1 3.472 3.947" /><path d="M18.112 15.093a13 13 0 0 0 2.23-1.93 1.68 1.68 0 0 0 0-2.326C18.811 9.18 16.032 7 12 7c-.64 0-1.25.055-1.827.154L8.505 5.486A12.6 12.6 0 0 1 12 5c4.811 0 8.083 2.609 9.81 4.48a3.68 3.68 0 0 1 0 5.04c-.58.629-1.334 1.34-2.263 2.008zM2.008 3.422a1 1 0 1 1 1.414-1.414L22 20.586A1 1 0 1 1 20.586 22z" /></g></svg>
                                 ) : (
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
+                                    <svg fill="none" stroke="currentColor" className="w-5 h-5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0" strokeWidth={2} /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7" strokeWidth={2} /></svg>
                                 )}
                             </button>
                         </div>
@@ -196,20 +178,13 @@ export default function LoginPage() {
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        disabled={loading || success}
-                        className="w-full bg-gradient-to-r from-[#003366] to-[#00509e] text-white font-semibold py-2.5 rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        disabled={loading}
+                        className="w-full bg-linear-to-r from-[#003366] to-[#00509e] text-white font-semibold py-2.5 rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         {loading ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                 Iniciando sesión...
-                            </>
-                        ) : success ? (
-                            <>
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                Iniciado
                             </>
                         ) : (
                             'Iniciar Sesión'
@@ -219,12 +194,12 @@ export default function LoginPage() {
 
                 {/* Forgot Password Link */}
                 <div className="text-center mt-4">
-                    <a
-                        href="#"
+                    <Link
+                        href="/recuperar-contrasena"
                         className="text-sm text-[#003366] hover:underline"
                     >
                         ¿Olvidaste tu contraseña?
-                    </a>
+                    </Link>
                 </div>
 
                 {/* Footer */}

@@ -22,12 +22,12 @@ export default function ClinicCard({ clinic, featured = false }: ClinicCardProps
     return (
         <Link
             href={`/clinicas/${clinic.id}`}
-            className={`group block bg-white rounded-2xl overflow-hidden border border-[var(--border-color)] hover:border-[var(--brand-deep-blue)] transition-all duration-300 hover:shadow-xl hover:shadow-[var(--brand-deep-blue)]/10 ${featured ? 'md:col-span-2 md:row-span-2' : ''
+            className={`group block bg-white rounded-2xl overflow-hidden border border-(--border-color) hover:border-(--brand-deep-blue) transition-all duration-300 hover:shadow-xl hover:shadow-(--brand-deep-blue)/10 ${featured ? 'md:col-span-2 md:row-span-2' : ''
                 }`}
         >
             {/* Image Placeholder */}
             <div
-                className={`relative bg-gradient-to-br from-[var(--brand-deep-blue)] to-[var(--brand-slate-blue)] ${featured ? 'h-48 md:h-64' : 'h-40'
+                className={`relative bg-linear-to-br from-(--brand-deep-blue) to-(--brand-slate-blue) ${featured ? 'h-48 md:h-64' : 'h-40'
                     }`}
             >
                 {/* Decorative Pattern */}
@@ -56,7 +56,7 @@ export default function ClinicCard({ clinic, featured = false }: ClinicCardProps
                 {/* Featured Badge */}
                 {featured && (
                     <div className="absolute top-4 left-4">
-                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--status-success)] text-white text-xs font-semibold rounded-full">
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-(--status-success) text-white text-xs font-semibold rounded-full">
                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                             </svg>
@@ -68,15 +68,15 @@ export default function ClinicCard({ clinic, featured = false }: ClinicCardProps
 
             {/* Content */}
             <div className="p-5">
-                <h3 className="text-lg font-bold text-[var(--text-heading)] group-hover:text-[var(--brand-deep-blue)] transition-colors line-clamp-1">
+                <h3 className="text-lg font-bold text-(--text-heading) group-hover:text-(--brand-deep-blue) transition-colors line-clamp-1">
                     {clinic.name}
                 </h3>
 
                 {/* Location */}
                 {clinic.address && (
-                    <div className="flex items-center gap-2 mt-2 text-sm text-[var(--text-main)] opacity-70">
+                    <div className="flex items-center gap-2 mt-2 text-sm text-(--text-main) opacity-70">
                         <svg
-                            className="w-4 h-4 flex-shrink-0 text-[var(--brand-slate-blue)]"
+                            className="w-4 h-4 shrink-0 text-(--brand-slate-blue)"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -109,13 +109,13 @@ export default function ClinicCard({ clinic, featured = false }: ClinicCardProps
                 )}
 
                 {/* CTA */}
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-[var(--border-color)]">
-                    <span className="text-sm font-medium text-[var(--brand-deep-blue)]">
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-(--border-color)">
+                    <span className="text-sm font-medium text-(--brand-deep-blue)">
                         Ver servicios
                     </span>
-                    <div className="w-8 h-8 rounded-full bg-[var(--bg-surface)] flex items-center justify-center group-hover:bg-[var(--brand-deep-blue)] transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-(--bg-surface) flex items-center justify-center group-hover:bg-(--brand-deep-blue) transition-colors">
                         <svg
-                            className="w-4 h-4 text-[var(--brand-deep-blue)] group-hover:text-white transition-colors"
+                            className="w-4 h-4 text-(--brand-deep-blue) group-hover:text-white transition-colors"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
