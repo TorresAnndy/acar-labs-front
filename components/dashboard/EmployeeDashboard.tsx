@@ -193,11 +193,11 @@ export default function EmployeeDashboard({ user, onLogout }: DashboardProps) {
     const clinicName = currentClinicName;
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 pt-16 md:pt-20">
             {popup && <Popup type={popup.type} message={popup.message} onClose={() => setPopup(null)} isOpen={false} />}
 
             {/* Sidebar */}
-            <aside className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col fixed h-full z-10 font-sans">
+            <aside className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col sticky top-20 h-[calc(100vh-5rem)] z-10 font-sans shrink-0 overflow-y-auto">
                 <div className="p-6 border-b border-gray-100">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="bg-teal-100 p-2 rounded-lg">
@@ -282,8 +282,8 @@ export default function EmployeeDashboard({ user, onLogout }: DashboardProps) {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 md:ml-64 min-h-screen">
-                <header className="bg-white border-b border-gray-200 sticky top-0 z-20 px-8 py-5 flex justify-between items-center shadow-sm">
+            <main className="flex-1 min-h-screen">
+                <header className="bg-white border-b border-gray-200 sticky top-16 md:top-20 z-20 px-8 py-5 flex justify-between items-center shadow-sm">
                     <h1 className="text-2xl font-bold text-gray-800">
                         {activeTab === 'appointments' && 'Gestión de Citas'}
                         {activeTab === 'services' && 'Servicios de la Clínica'}

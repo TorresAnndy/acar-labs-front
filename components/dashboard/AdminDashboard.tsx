@@ -142,11 +142,11 @@ export default function AdminDashboard({ user, onLogout }: DashboardProps) {
     };
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 pt-16 md:pt-20">
             {popup && <Popup type={popup.type} message={popup.message} onClose={() => setPopup(null)} isOpen={false} />}
 
             {/* Sidebar */}
-            <aside className="w-64 bg-gray-900 border-r border-gray-800 hidden md:flex flex-col fixed h-full z-10 text-white">
+            <aside className="w-64 bg-gray-900 border-r border-gray-800 hidden md:flex flex-col sticky top-20 h-[calc(100vh-5rem)] z-10 text-white shrink-0 overflow-y-auto">
                 <div className="p-6 border-b border-gray-800">
                     <div className="flex items-center gap-3 mb-1">
                         <div className="bg-blue-600 p-2 rounded-lg">
@@ -179,7 +179,7 @@ export default function AdminDashboard({ user, onLogout }: DashboardProps) {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 md:ml-64 min-h-screen p-8">
+            <main className="flex-1 min-h-screen p-8">
                 <header className="mb-8 flex justify-between items-center">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">
