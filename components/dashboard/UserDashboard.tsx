@@ -386,13 +386,13 @@ export default function UserDashboard({ user, onLogout }: UserDashboardProps) {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                                                        ${apt.status === 'scheduled' || apt.status === 'confirmed' ? 'bg-blue-100 text-blue-800' : ''}
+                                                        ${apt.status === 'scheduled' ? 'bg-blue-100 text-blue-800' : ''}
                                                         ${apt.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : ''}
                                                         ${apt.status === 'completed' ? 'bg-green-100 text-green-800' : ''}
                                                         ${apt.status === 'cancelled' ? 'bg-red-100 text-red-800' : ''}
-                                                        ${!['scheduled', 'confirmed', 'pending', 'completed', 'cancelled'].includes(apt.status) ? 'bg-gray-100 text-gray-800' : ''}
+                                                        ${!['scheduled', 'pending', 'completed', 'cancelled'].includes(apt.status) ? 'bg-gray-100 text-gray-800' : ''}
                                                     `}>
-                                                        {apt.status === 'scheduled' || apt.status === 'confirmed' ? 'Agendada' :
+                                                        {apt.status === 'scheduled' ? 'Agendada' :
                                                             apt.status === 'pending' ? 'Pendiente' :
                                                                 apt.status === 'completed' ? 'Completada' :
                                                                     apt.status === 'cancelled' ? 'Cancelada' : apt.status}

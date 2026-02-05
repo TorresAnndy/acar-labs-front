@@ -62,6 +62,10 @@ export interface Appointment {
     employee?: {
         name: string;
     };
+    user?: {
+        name: string;
+        email?: string;
+    };
     laboratoryResults?: {
         id: number;
         test_type: string;

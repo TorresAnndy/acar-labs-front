@@ -22,18 +22,76 @@ interface DashboardProps {
 
 type Tab = 'appointments' | 'services' | 'profile';
 
+// --- MOCK DATA ---
+const MOCK_APPOINTMENTS: Appointment[] = [
+    {
+        id: 101,
+        scheduled_date: '2026-02-15 10:00:00',
+        status: 'pending',
+        service: { id: 1, name: 'Limpieza Dental Profunda', description: '', price: 85, estimated_time: 45, is_active: true },
+        user: { name: 'Mariana López', email: 'mariana.l@example.com' },
+        clinic: { id: 991, name: 'Smartlabs Central' },
+        created_at: '2026-02-01 10:00:00'
+    },
+    {
+        id: 102,
+        scheduled_date: '2026-02-15 11:30:00',
+        status: 'scheduled',
+        service: { id: 2, name: 'Consulta General', description: '', price: 40, estimated_time: 30, is_active: true },
+        user: { name: 'Juan Carlos Ruiz', email: 'jc.ruiz@example.com' },
+        clinic: { id: 991, name: 'Smartlabs Central' },
+        created_at: '2026-02-01 11:00:00'
+    },
+    {
+        id: 103,
+        scheduled_date: '2026-02-14 15:00:00',
+        status: 'completed',
+        service: { id: 3, name: 'Ortodoncia - Ajuste', description: '', price: 60, estimated_time: 20, is_active: true },
+        user: { name: 'Elena Gomez', email: 'e.gomez@example.com' },
+        clinic: { id: 991, name: 'Smartlabs Central' },
+        created_at: '2026-01-20 15:00:00'
+    },
+    {
+        id: 104,
+        scheduled_date: '2026-02-16 09:00:00',
+        status: 'cancelled',
+        service: { id: 2, name: 'Consulta General', description: '', price: 40, estimated_time: 30, is_active: true },
+        user: { name: 'Pedro Martinez', email: 'p.martinez@example.com' },
+        clinic: { id: 991, name: 'Smartlabs Central' },
+        created_at: '2026-02-05 09:00:00'
+    }
+];
+
+const MOCK_SERVICES: Service[] = [
+    { id: 1, name: 'Limpieza Dental Profunda', description: 'Limpieza completa con ultrasonido y pulido.', price: 85, estimated_time: 45, is_active: true },
+    { id: 2, name: 'Consulta General', description: 'Revisión general y diagnóstico inicial.', price: 40, estimated_time: 30, is_active: true },
+    { id: 3, name: 'Ortodoncia - Ajuste', description: 'Control mensual de brackets.', price: 60, estimated_time: 20, is_active: true },
+    { id: 4, name: 'Blanqueamiento Zoom', description: 'Blanqueamiento profesional en 1 sesión.', price: 250, estimated_time: 90, is_active: false },
+];
+
+const MOCK_CLINICS = [
+    { id: 991, name: 'Smartlabs Central' },
+    { id: 992, name: 'Clínica Dental Norte' },
+    { id: 993, name: 'Centro Especialidades Sur' },
+];
+
 export default function EmployeeDashboard({ user, onLogout }: DashboardProps) {
     const [activeTab, setActiveTab] = useState<Tab>('appointments');
     const [popup, setPopup] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
-    // Appointments State
-    const [appointments, setAppointments] = useState<Appointment[]>([]);
-    const [loadingAppointments, setLoadingAppointments] = useState(false);
+    // Filter Logic
     const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'scheduled' | 'completed' | 'cancelled'>('scheduled');
 
-    // Services State
+    // MOCK STATES
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [loadingAppointments, setLoadingAppointments] = useState(false);
     const [services, setServices] = useState<Service[]>([]);
     const [loadingServices, setLoadingServices] = useState(false);
+
+    // Clinic Selection State
+    const [availableClinics, setAvailableClinics] = useState<any[]>(MOCK_CLINICS);
+    const [selectedClinicId, setSelectedClinicId] = useState<number | string>(user.employees?.[0]?.clinic?.id || 991);
+    const [currentClinicName, setCurrentClinicName] = useState(user.employees?.[0]?.clinic?.name || 'Smartlabs Central');
 
     // Profile State
     const [profileData, setProfileData] = useState({
@@ -47,145 +105,127 @@ export default function EmployeeDashboard({ user, onLogout }: DashboardProps) {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
     useEffect(() => {
-        if (activeTab === 'appointments') {
-            fetchAppointments();
-        } else if (activeTab === 'services') {
-            fetchServices();
-        }
-    }, [activeTab, filterStatus]); // Removed 'user' from dependency as it's prop
+        // Init Mock Data on load (simulating fetch delay)
+        const loadMockData = async () => {
+            if (activeTab === 'appointments') {
+                setLoadingAppointments(true);
+                setTimeout(() => {
+                    let filtered = [...MOCK_APPOINTMENTS];
+                    if (filterStatus !== 'all') {
+                        filtered = filtered.filter(a => a.status === filterStatus);
+                    }
+                    setAppointments(filtered);
+                    setLoadingAppointments(false);
+                }, 600);
+            } else if (activeTab === 'services') {
+                setLoadingServices(true);
+                setTimeout(() => {
+                    setServices([...MOCK_SERVICES]);
+                    setLoadingServices(false);
+                }, 500);
+            }
+        };
+
+        loadMockData();
+    }, [activeTab, filterStatus, selectedClinicId]); // Reload when tab, filter, or clinic changes
+
+    // Intentar cargar clínicas reales (si falla, usamos los mocks por defecto)
+    useEffect(() => {
+        const fetchRealClinics = async () => {
+            try {
+                const token = localStorage.getItem('auth_token');
+                // Intentamos /public/clinics que no requiere auth estricta de suscripción
+                const res = await fetch(`${apiUrl}/public/clinics`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.data && data.data.length > 0) {
+                        setAvailableClinics(data.data);
+                    }
+                }
+            } catch (e) {
+                console.log("Using mock clinics due to fetch error");
+            }
+        };
+        fetchRealClinics();
+    }, []);
+
+    const handleClinicChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newId = e.target.value;
+        const clinic = availableClinics.find(c => c.id.toString() === newId.toString());
+        setSelectedClinicId(newId);
+        if (clinic) setCurrentClinicName(clinic.name);
+        showPopup('success', `Cambiando a: ${clinic ? clinic.name : 'Nueva clínica'}`);
+    };
 
     const showPopup = (type: 'success' | 'error', message: string) => {
         setPopup({ type, message });
         setTimeout(() => setPopup(null), 3000);
     };
 
-    const getAuthHeaders = () => {
-        const token = localStorage.getItem('auth_token');
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        };
-    };
+    // Removed getAuthHeaders, ensureClinicToken, Real Fetchers for now to use Mock Only as requested
 
-    const fetchAppointments = async () => {
+    // Mock Update Status
+    const updateAppointmentStatus = async (id: number, newStatus: Appointment['status']) => {
         setLoadingAppointments(true);
-        try {
-            const response = await fetch(`${apiUrl}/appointments`, {
-                headers: getAuthHeaders()
-            });
+        setTimeout(() => {
+            // Update local state to simulate backend change
+            const updated = appointments.filter(a => a.id !== id); // Remove from current view if filtering by specific status
+            // Or better logic:
+            setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
 
-            if (!response.ok) throw new Error('Error al cargar citas');
-
-            const data = await response.json();
-            let apps: Appointment[] = data.data || [];
-
-            // Filter logic
-            if (filterStatus !== 'all') {
-                apps = apps.filter(app => app.status === filterStatus);
+            // If we are viewing a specific status (e.g. Pending) and move to Scheduled, it should disappear from view?
+            // Usually yes, but for UX let's just refresh list
+            if (filterStatus !== 'all' && filterStatus !== newStatus) {
+                setAppointments(prev => prev.filter(a => a.id !== id));
             }
-
-            // Also filter by clinic (Safety check)
-            const myClinicId = user.employees?.[0]?.clinic_id;
-            if (myClinicId) {
-                // If backend returns ALL appointments system-wide (unlikely but possible for admin/some roles), filter:
-                // But normally /appointments returns scoped data. 
-                // We'll trust backend for now or client-filter if needed.
-                // apps = apps.filter(app => app.clinic.id === myClinicId);
-            }
-
-            setAppointments(apps);
-        } catch (error) {
-            console.error(error);
-            showPopup('error', 'No se pudieron cargar las citas de la clínica.');
-        } finally {
-            setLoadingAppointments(false);
-        }
-    };
-
-    const updateAppointmentStatus = async (id: number, newStatus: string) => {
-        try {
-            const response = await fetch(`${apiUrl}/appointments/${id}`, {
-                method: 'PUT',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ status: newStatus })
-            });
-
-            if (!response.ok) throw new Error('Error al actualizar estado');
 
             showPopup('success', `Cita marcada como ${newStatus}`);
-            fetchAppointments();
-        } catch (error) {
-            console.error(error);
-            showPopup('error', 'Fallo al actualizar el estado de la cita.');
-        }
-    };
-
-    const fetchServices = async () => {
-        setLoadingServices(true);
-        try {
-            const response = await fetch(`${apiUrl}/services`, {
-                headers: getAuthHeaders()
-            });
-            if (!response.ok) throw new Error('Error al cargar servicios');
-            const data = await response.json();
-            setServices(data.data || []);
-        } catch (error) {
-            console.error(error);
-            showPopup('error', 'No se pudieron cargar los servicios.');
-        } finally {
-            setLoadingServices(false);
-        }
+            setLoadingAppointments(false);
+        }, 500);
     };
 
     const handleProfileUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const endpoint = profileData.new_password
-                ? `${apiUrl}/profile/password`
-                : `${apiUrl}/profile`;
-
-            const body = profileData.new_password ? {
-                current_password: profileData.current_password,
-                password: profileData.new_password,
-                password_confirmation: profileData.new_password_confirmation
-            } : {
-                name: profileData.name,
-                email: profileData.email
-            };
-
-            const response = await fetch(endpoint, {
-                method: 'PUT',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(body)
-            });
-
-            if (!response.ok) throw new Error('Error al actualizar perfil');
-
-            showPopup('success', 'Perfil actualizado correctamente');
-            setProfileData(prev => ({ ...prev, current_password: '', new_password: '', new_password_confirmation: '' }));
-        } catch (error: any) {
-            showPopup('error', error.message || 'Error al actualizar');
-        }
+        // Simular update
+        showPopup('success', 'Perfil actualizado correctamente (Simulación)');
     };
 
-    const clinicName = user.employees?.[0]?.clinic?.name || 'Tu Clínica';
+    const clinicName = currentClinicName;
 
     return (
         <div className="flex min-h-screen bg-gray-50">
             {popup && <Popup type={popup.type} message={popup.message} onClose={() => setPopup(null)} isOpen={false} />}
 
             {/* Sidebar */}
-            <aside className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col fixed h-full z-10">
+            <aside className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col fixed h-full z-10 font-sans">
                 <div className="p-6 border-b border-gray-100">
-                    <div className="flex items-center gap-3 mb-1">
+                    <div className="flex items-center gap-3 mb-4">
                         <div className="bg-teal-100 p-2 rounded-lg">
                             <Briefcase className="h-6 w-6 text-teal-600" />
                         </div>
                         <div>
                             <span className="font-bold text-gray-800 block text-sm">Portal Empleado</span>
-                            <span className="text-xs text-teal-600 font-medium truncate w-[140px] block" title={clinicName}>
-                                {clinicName}
-                            </span>
+                        </div>
+                    </div>
+
+                    {/* Clinic Selector */}
+                    <div>
+                        <label className="text-[10px] uppercase font-bold text-gray-400 mb-1 block">Clínica Actual</label>
+                        <div className="relative">
+                            <select
+                                value={selectedClinicId}
+                                onChange={handleClinicChange}
+                                className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg p-2.5 pr-8 focus:ring-teal-500 focus:border-teal-500 block truncate font-medium outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+                            >
+                                {availableClinics.map(clinic => (
+                                    <option key={clinic.id} value={clinic.id}>
+                                        {clinic.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                            </div>
                         </div>
                     </div>
                 </div>
