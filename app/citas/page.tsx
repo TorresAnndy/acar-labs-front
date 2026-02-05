@@ -12,6 +12,8 @@ function CreateAppointmentContent() {
     // Datos recuperados de la URL (enviados desde el ServiceCard)
     const clinicName = searchParams.get('clinicName');
     const clinicId = searchParams.get('clinicId');
+    const serviceId = searchParams.get('serviceId');
+    const serviceName = searchParams.get('serviceName');
 
     // Estados del formulario
     const [fecha, setFecha] = useState('');
@@ -31,12 +33,12 @@ function CreateAppointmentContent() {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-    // Validación de seguridad: Si no hay ID de clínica, volvemos a servicios
+    // Validación de seguridad: Si no hay ID de clínica o servicio, volvemos a servicios
     useEffect(() => {
-        if (!clinicId) {
+        if (!clinicId || !serviceId) {
             router.push('/servicios');
         }
-    }, [clinicId, router]);
+    }, [clinicId, serviceId, router]);
 
     const handleClosePopup = () => {
         setPopup(prev => ({ ...prev, isOpen: false }));
@@ -52,8 +54,8 @@ function CreateAppointmentContent() {
         // Usamos el nombre de token que detectamos en tu localStorage
         const token = localStorage.getItem('auth_token');
 
-        // Formato para tu API: "YYYY-MM-DD HH:mm:ss"
-        const scheduledDate = `${fecha} ${hora}:00`;
+        // Formato para tu API: "YYYY-MM-DDTHH:mm:ss"
+        const scheduledDate = `${fecha}T${hora}:00`;
 
         try {
             const response = await fetch(`${API_URL}/appointments`, {
@@ -65,8 +67,9 @@ function CreateAppointmentContent() {
                 },
                 body: JSON.stringify({
                     scheduled_date: scheduledDate,
-                    status: 'pending', // Estado inicial según tu API
-                    clinic_id: parseInt(clinicId || '0')
+                    status: 'scheduled',
+                    clinic_id: Number(clinicId),
+                    service_id: Number(serviceId)
                 }),
             });
 
@@ -76,16 +79,27 @@ function CreateAppointmentContent() {
                 setPopup({
                     isOpen: true,
                     type: 'success',
-                    message: '¡Tu cita ha sido agendada correctamente!'
+                    message: res.message || '¡Tu cita ha sido agendada correctamente!'
                 });
             } else {
+                // Manejo detallado de errores de validación de Laravel
+                let errorMessage = res.message || "No se pudo procesar la cita.";
+                
+                if (res.errors) {
+                    // Si hay errores de validación específicos, los mostramos
+                    const details = Object.values(res.errors).flat().join(', ');
+                    errorMessage = `${res.message}: ${details}`;
+                }
+
                 setPopup({
                     isOpen: true,
                     type: 'error',
-                    message: res.message || "No se pudo procesar la cita. Por favor intenta de nuevo."
+                    message: errorMessage
                 });
             }
         } catch (err) {
+            console.error(err);
+
             setPopup({
                 isOpen: true,
                 type: 'error',
@@ -116,9 +130,17 @@ function CreateAppointmentContent() {
 
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
                 {/* Resumen del servicio seleccionado */}
-                <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
-                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Clinica</span>
-                    <p className="text-[#003366] font-bold text-lg leading-tight mt-1">{clinicName}</p>
+                <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 space-y-3">
+                    <div>
+                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Clinica</span>
+                        <p className="text-[#003366] font-bold text-lg leading-tight mt-1">{clinicName}</p>
+                    </div>
+                    {serviceName && (
+                        <div>
+                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Servicio</span>
+                            <p className="text-[#003366] font-bold text-lg leading-tight mt-1">{serviceName}</p>
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-5">

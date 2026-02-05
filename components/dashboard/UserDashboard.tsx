@@ -25,13 +25,13 @@ export default function UserDashboard({ user, onLogout }: UserDashboardProps) {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
     // --- Popup State ---
-    const [popup, setPopup] = useState<{ isOpen: boolean; type: 'success' | 'error'; message: string }>({
+    const [popup, setPopup] = useState<{ isOpen: boolean; type: 'success' | 'error' | 'info'; message: string }>({
         isOpen: false,
         type: 'success',
         message: ''
     });
 
-    const showPopup = (type: 'success' | 'error', message: string) => {
+    const showPopup = (type: 'success' | 'error' | 'info', message: string) => {
         setPopup({ isOpen: true, type, message });
     };
 
