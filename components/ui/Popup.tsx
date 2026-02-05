@@ -1,5 +1,5 @@
 interface PopupProps {
-    type: 'success' | 'error';
+    type: 'success' | 'error' | 'info';
     message: string;
     isOpen: boolean;
     onClose: () => void;
@@ -18,13 +18,19 @@ export default function Popup({ type, message, isOpen, onClose }: PopupProps) {
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex flex-col items-center text-center">
-                    {type === 'success' ? (
+                    {type === 'success' && (
                         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
                             <svg fill="none" stroke="currentColor" className="w-8 h-8 text-green-600" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" strokeWidth={3} /></svg>
                         </div>
-                    ) : (
+                    )}
+                    {type === 'error' && (
                         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
                             <svg fill="none" stroke="currentColor" className="w-8 h-8 text-red-600" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" strokeWidth={3} /></svg>
+                        </div>
+                    )}
+                    {type === 'info' && (
+                        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                            <svg fill="none" stroke="currentColor" className="w-8 h-8 text-blue-600" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0" strokeWidth={2} /></svg>
                         </div>
                     )}
 

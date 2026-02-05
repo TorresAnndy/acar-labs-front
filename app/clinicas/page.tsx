@@ -14,27 +14,62 @@ export default function ClinicasPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProvince, setSelectedProvince] = useState<string>('all');
 
-    // Fetch clinics from API
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 9;
+
+    // Fetch clinics from API (Handling Backend Pagination)
     useEffect(() => {
-        const fetchClinics = async () => {
+        const fetchAllClinics = async () => {
             try {
                 setLoading(true);
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-                const response = await fetch(`${apiUrl}/public/clinics`);
 
-                if (!response.ok) {
-                    throw new Error('Error al cargar las clínicas');
-                }
-
+                // 1. Fetch First Page
+                const response = await fetch(`${apiUrl}/public/clinics?page=1`);
+                if (!response.ok) throw new Error('Error al cargar las clínicas');
                 const data = await response.json();
 
-                let clinicsData: any[] = [];
-                if (Array.isArray(data?.data)) clinicsData = data.data;
-                else if (Array.isArray(data)) clinicsData = data;
-                else if (Array.isArray(data?.clinics)) clinicsData = data.clinics;
-                else if (Array.isArray(data?.results)) clinicsData = data.results;
+                let allRawClinics: any[] = [];
+                let lastPage = 1;
 
-                const mappedClinics = clinicsData.map((clinic) => ({
+                // 2. Extract Data & Pagination Info
+                if (data.data && Array.isArray(data.data)) {
+                    allRawClinics = data.data;
+
+                    // Detect different pagination structures
+                    if (data.pagination?.last_page) {
+                        // Estructura custom: { data: [], pagination: { last_page: 5 } }
+                        lastPage = data.pagination.last_page;
+                    } else if (data.last_page) {
+                        // Estructura Laravel default: { data: [], last_page: 5 }
+                        lastPage = data.last_page;
+                    } else if (data.meta?.last_page) {
+                        // Estructura Laravel Resource: { data: [], meta: { last_page: 5 } }
+                        lastPage = data.meta.last_page;
+                    }
+                } else if (Array.isArray(data)) {
+                    // No pagination structure, just array
+                    allRawClinics = data;
+                }
+
+                // 3. Fetch Remaining Pages (if any)
+                if (lastPage > 1) {
+                    const promises = [];
+                    for (let i = 2; i <= lastPage; i++) {
+                        promises.push(fetch(`${apiUrl}/public/clinics?page=${i}`).then(res => res.json()));
+                    }
+
+                    const responses = await Promise.all(promises);
+                    responses.forEach((res: any) => {
+                        if (res.data && Array.isArray(res.data)) {
+                            allRawClinics = [...allRawClinics, ...res.data];
+                        }
+                    });
+                }
+
+                // 4. Map & Set State
+                const mappedClinics = allRawClinics.map((clinic) => ({
                     ...clinic,
                     address: clinic.address || {
                         city: 'Por confirmar',
@@ -52,7 +87,7 @@ export default function ClinicasPage() {
             }
         };
 
-        fetchClinics();
+        fetchAllClinics();
     }, []);
 
     const provinces = Array.from(
@@ -82,7 +117,19 @@ export default function ClinicasPage() {
         }
 
         setFilteredClinics(filtered);
+        setCurrentPage(1); // Reset to first page when filters change
     }, [searchTerm, selectedProvince, clinics]);
+
+    // Calculate pagination
+    const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+    const currentClinics = filteredClinics.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredClinics.length / ITEMS_PER_PAGE);
+
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+        window.scrollTo({ top: 300, behavior: 'smooth' }); // Scroll to top of list
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -188,11 +235,11 @@ export default function ClinicasPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {filteredClinics.map((clinic, index) => (
+                            {currentClinics.map((clinic, index) => (
                                 <ClinicCard
                                     key={clinic.id ?? index}
                                     clinic={clinic}
-                                    featured={index === 0}
+                                    featured={index === 0 && currentPage === 1}
                                 />
                             ))}
                             {filteredClinics.length === 0 && (
@@ -214,6 +261,63 @@ export default function ClinicasPage() {
                                     </button>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* Pagination Controls */}
+                    {!loading && filteredClinics.length > ITEMS_PER_PAGE && (
+                        <div className="mt-12 flex justify-center items-center gap-2">
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className={`w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 transition-all ${currentPage === 1
+                                        ? 'text-gray-300 cursor-not-allowed'
+                                        : 'text-[#003366] hover:bg-[#003366] hover:text-white hover:border-[#003366] cursor-pointer'
+                                    }`}
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                            </button>
+
+                            {/* Page Numbers */}
+                            {Array.from({ length: totalPages }).map((_, index) => {
+                                const page = index + 1;
+                                // Simple logic to show limited pages if too many (optional, keeping it simple for now as requested "9 clinics" likely won't result in dozens of pages soon)
+                                if (
+                                    page === 1 ||
+                                    page === totalPages ||
+                                    (page >= currentPage - 1 && page <= currentPage + 1)
+                                ) {
+                                    return (
+                                        <button
+                                            key={page}
+                                            onClick={() => handlePageChange(page)}
+                                            className={`w-10 h-10 flex items-center justify-center rounded-full font-bold transition-all ${currentPage === page
+                                                    ? 'bg-[#003366] text-white shadow-md transform scale-110'
+                                                    : 'text-gray-600 hover:bg-gray-100 hover:text-[#003366]'
+                                                }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    );
+                                } else if (
+                                    (page === currentPage - 2 && currentPage > 3) ||
+                                    (page === currentPage + 2 && currentPage < totalPages - 2)
+                                ) {
+                                    return <span key={page} className="text-gray-400">...</span>;
+                                }
+                                return null;
+                            })}
+
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className={`w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 transition-all ${currentPage === totalPages
+                                        ? 'text-gray-300 cursor-not-allowed'
+                                        : 'text-[#003366] hover:bg-[#003366] hover:text-white hover:border-[#003366] cursor-pointer'
+                                    }`}
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                            </button>
                         </div>
                     )}
                 </div>

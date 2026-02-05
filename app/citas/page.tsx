@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
@@ -12,11 +13,14 @@ function CreateAppointmentContent() {
     // Datos recuperados de la URL (enviados desde el ServiceCard)
     const clinicName = searchParams.get('clinicName');
     const clinicId = searchParams.get('clinicId');
+    const serviceId = searchParams.get('serviceId');
+    const serviceName = searchParams.get('serviceName');
 
     // Estados del formulario
     const [fecha, setFecha] = useState('');
     const [hora, setHora] = useState('');
     const [loading, setLoading] = useState(false);
+    const [userId, setUserId] = useState<number | null>(null);
 
     // Estado del Popup
     const [popup, setPopup] = useState<{
@@ -31,12 +35,33 @@ function CreateAppointmentContent() {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-    // Validación de seguridad: Si no hay ID de clínica, volvemos a servicios
+    // Obtener ID del usuario al cargar
     useEffect(() => {
-        if (!clinicId) {
+        const fetchUser = async () => {
+            const token = localStorage.getItem('auth_token');
+            if (!token) return;
+            try {
+                const res = await fetch(`${API_URL}/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.data?.id) {
+                        setUserId(Number(data.data.id));
+                    }
+                }
+            } catch (error) {
+            }
+        };
+        fetchUser();
+    }, [API_URL]);
+
+    // Validación de seguridad: Si no hay ID de clínica o servicio, volvemos a servicios
+    useEffect(() => {
+        if (!clinicId || !serviceId) {
             router.push('/servicios');
         }
-    }, [clinicId, router]);
+    }, [clinicId, serviceId, router]);
 
     const handleClosePopup = () => {
         setPopup(prev => ({ ...prev, isOpen: false }));
@@ -56,6 +81,17 @@ function CreateAppointmentContent() {
         const scheduledDate = `${fecha} ${hora}:00`;
 
         try {
+            const body: any = {
+                scheduled_date: scheduledDate,
+                status: 'pending', // Dejamos el estado correcto para cuando el backend corrija sus reglas de validación
+                clinic_id: Number(clinicId),
+                service_id: Number(serviceId)
+            };
+
+            if (userId) {
+                body.user_id = userId;
+            }
+
             const response = await fetch(`${API_URL}/appointments`, {
                 method: 'POST',
                 headers: {
@@ -63,11 +99,7 @@ function CreateAppointmentContent() {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    scheduled_date: scheduledDate,
-                    status: 'pending', // Estado inicial según tu API
-                    clinic_id: parseInt(clinicId || '0')
-                }),
+                body: JSON.stringify(body),
             });
 
             const res = await response.json();
@@ -76,16 +108,28 @@ function CreateAppointmentContent() {
                 setPopup({
                     isOpen: true,
                     type: 'success',
-                    message: '¡Tu cita ha sido agendada correctamente!'
+                    message: '¡Cita creada exitosamente! Pronto recibirás los detalles en tu correo.'
                 });
             } else {
+                // Mensajes de error en Español
+                let errorMessage = "No se pudo agendar la cita.";
+
+                if (res.errors) {
+                    errorMessage = "Por favor verifica los datos enviados (fecha, hora o servicio).";
+                } else if (res.message === 'Unauthenticated.') {
+                    errorMessage = "Tu sesión ha expirado. Por favor inicia sesión nuevamente.";
+                } else {
+                    errorMessage = "Ocurrió un error en el servidor. Intenta más tarde.";
+                }
+
                 setPopup({
                     isOpen: true,
                     type: 'error',
-                    message: res.message || "No se pudo procesar la cita. Por favor intenta de nuevo."
+                    message: errorMessage
                 });
             }
         } catch (err) {
+
             setPopup({
                 isOpen: true,
                 type: 'error',
@@ -116,9 +160,17 @@ function CreateAppointmentContent() {
 
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
                 {/* Resumen del servicio seleccionado */}
-                <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
-                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Clinica</span>
-                    <p className="text-[#003366] font-bold text-lg leading-tight mt-1">{clinicName}</p>
+                <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 space-y-3">
+                    <div>
+                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Clinica</span>
+                        <p className="text-[#003366] font-bold text-lg leading-tight mt-1">{clinicName}</p>
+                    </div>
+                    {serviceName && (
+                        <div>
+                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Servicio</span>
+                            <p className="text-[#003366] font-bold text-lg leading-tight mt-1">{serviceName}</p>
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-5">
