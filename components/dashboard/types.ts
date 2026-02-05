@@ -34,6 +34,8 @@ export interface User {
     name: string;
     email: string;
     is_active: boolean;
+    is_admin?: boolean; // Added based on codebase hints
+    role?: string;      // Added for fallback role check
     created_at: string;
     employees?: Employee[];
 }

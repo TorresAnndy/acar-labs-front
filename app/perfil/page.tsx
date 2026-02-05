@@ -65,24 +65,36 @@ export default function UnifiedDashboardPage() {
             // Determine Role Logic
             let detectedRole: DashboardRole = 'user';
 
-            if (userData.employees && userData.employees.length > 0) {
-                // Check the first employee record (assuming single active employment usually)
+            // 1. Check direct admin flag or role on User object (System Admin)
+            // Backend returns 'ADMIN' in uppercase
+            if (userData.is_admin || userData.role === 'ADMIN' || userData.role?.name === 'ADMIN' || userData.role === 'admin' || userData.role?.name === 'admin') {
+                detectedRole = 'admin';
+            }
+            // 2. Check Employee roles (Clinic Context)
+            else if (userData.employees && userData.employees.length > 0) {
                 const employee = userData.employees[0];
                 const roleName = employee.role?.name?.toUpperCase();
 
                 if (roleName === 'OWNER') {
                     detectedRole = 'owner';
                 } else if (roleName === 'ADMIN') {
+                    // If they are an 'ADMIN' within a clinic scope, they might see ClinicOwner or Admin dashboard?
+                    // Usually 'ADMIN' in employee context implies Clinic Manager/Owner level.
+                    // But if the requirement separates 'AdminDashboard' (App Level) vs 'ClinicOwner' (Clinic Level),
+                    // we need to be careful.
+                    // Assuming 'ADMIN' role in employee table = Clinic Admin -> ClinicOwnerDashboard or specific ?
+                    // User request said: "si eres admin miras el AdminDashboard.tsx"
+                    // Let's map it to admin for now, but usually employee-admin is clinic-level.
+                    // Given the previous code, let's treat explicit 'ADMIN' role as global Admin if not owner.
                     detectedRole = 'admin';
                 } else {
-                    // Doctor, Nurse, Staff, etc.
                     detectedRole = 'employee';
                 }
             }
 
             setCurrentRole(detectedRole);
-
         } catch (err) {
+            console.error(err);
         } finally {
             setLoading(false);
         }
