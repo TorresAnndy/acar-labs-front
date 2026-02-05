@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
@@ -104,6 +105,10 @@ export default function UserDashboard({ user, onLogout }: UserDashboardProps) {
             console.error(err);
             showPopup('error', err.message || 'No se pudo actualizar el perfil.');
         }
+    };
+
+    const handleSelectPlan = (plan: Plan) => {
+        showPopup('info', `Has seleccionado el plan "${plan.name}". Esta es una maqueta: el proceso de pago y registro de clínica no está activo en esta demo.`);
     };
 
     // --- Appointments Fetching ---
@@ -441,7 +446,10 @@ export default function UserDashboard({ user, onLogout }: UserDashboardProps) {
                                             ))}
                                         </ul>
 
-                                        <button className="w-full py-3 bg-[#003366] text-white rounded-xl font-semibold hover:bg-[#004080] transition-colors shadow-md">
+                                        <button 
+                                            onClick={() => handleSelectPlan(plan)}
+                                            className="w-full py-3 bg-[#003366] text-white rounded-xl font-semibold hover:bg-[#004080] transition-colors shadow-md"
+                                        >
                                             Contratar Plan
                                         </button>
                                     </div>
