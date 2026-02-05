@@ -66,8 +66,7 @@ export default function UnifiedDashboardPage() {
             let detectedRole: DashboardRole = 'user';
 
             // 1. Check direct admin flag or role on User object (System Admin)
-            // Backend returns 'ADMIN' in uppercase
-            if (userData.is_admin || userData.role === 'ADMIN' || userData.role?.name === 'ADMIN' || userData.role === 'admin' || userData.role?.name === 'admin') {
+            if (userData.is_admin || userData.role === 'admin' || userData.role?.name === 'admin') {
                 detectedRole = 'admin';
             }
             // 2. Check Employee roles (Clinic Context)
