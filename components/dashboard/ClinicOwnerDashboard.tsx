@@ -12,9 +12,12 @@ import {
     Trash2,
     Mail,
     Building,
-    Stethoscope
+    Stethoscope,
+    TrendingUp,
+    Calendar,
+    DollarSign
 } from 'lucide-react';
-import { User as UserType, Clinic, Service } from './types'; // Removed Appointment if unused
+import { User as UserType, Clinic, Service, Employee } from './types';
 import Popup from '../ui/Popup';
 
 interface DashboardProps {
@@ -24,12 +27,40 @@ interface DashboardProps {
 
 type Tab = 'overview' | 'employees' | 'services' | 'settings' | 'profile';
 
+// --- MOCK DATA ---
+const MOCK_STATS = {
+    employees_count: 8,
+    active_services: 12,
+    monthly_revenue: 15420,
+    total_patients: 1250,
+    appointments_today: 14,
+    satisfaction_score: 4.8
+};
+
+const MOCK_EMPLOYEES_DATA: any[] = [
+    { id: 1, user: { name: 'Dr. Alejandro Silva', email: 'a.silva@clinic.com' }, role: { name: 'DOCTOR' }, status: 'active' },
+    { id: 2, user: { name: 'Dra. Beatrice M.', email: 'b.m@clinic.com' }, role: { name: 'DOCTOR' }, status: 'active' },
+    { id: 3, user: { name: 'Carlos Recepción', email: 'recepcion@clinic.com' }, role: { name: 'RECEPTIONIST' }, status: 'active' },
+];
+
+const MOCK_PENDING_INVITATIONS_DATA = [
+    { id: 101, email: 'nuevo.doctor@gmail.com', role: 'DOCTOR', created_at: '2026-02-01' }
+];
+
+const MOCK_SERVICES_DATA: Service[] = [
+    { id: 1, name: 'Consulta General', description: 'Evaluación inicial.', price: 40, estimated_time: 30, is_active: true },
+    { id: 2, name: 'Limpieza Profunda', description: 'Pro profilaxis.', price: 80, estimated_time: 45, is_active: true },
+    { id: 3, name: 'Extracción Simple', description: 'Sin cirugía.', price: 60, estimated_time: 40, is_active: true },
+    { id: 4, name: 'Blanqueamiento', description: 'Estético.', price: 200, estimated_time: 60, is_active: false },
+];
+
 export default function ClinicOwnerDashboard({ user, onLogout }: DashboardProps) {
     const [activeTab, setActiveTab] = useState<Tab>('overview');
     const [popup, setPopup] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
     // Data States
     const [clinic, setClinic] = useState<Clinic | null>(null);
+    const [stats, setStats] = useState(MOCK_STATS);
     const [employees, setEmployees] = useState<any[]>([]);
     const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
     const [services, setServices] = useState<Service[]>([]);
@@ -52,157 +83,99 @@ export default function ClinicOwnerDashboard({ user, onLogout }: DashboardProps)
     const clinicId = myClinic?.id;
 
     useEffect(() => {
-        if (myClinic) setClinic(myClinic);
+        // Mock Clinic Init
+        setClinic(myClinic || { id: 999, name: 'Clínica Demo (Dueño)', status: 'Active' });
     }, [myClinic]);
 
     useEffect(() => {
-        if (clinicId) {
-            if (activeTab === 'employees') {
-                fetchEmployees();
-                fetchPendingInvitations();
-            } else if (activeTab === 'services') {
-                fetchServices();
-            }
-        }
-    }, [activeTab, clinicId]);
+        // Load Mock Data based on tab
+        const loadTab = async () => {
+            setLoading(true);
+            // Simulate network delay
+            await new Promise(r => setTimeout(r, 600));
 
-    const getAuthHeaders = () => {
-        const token = localStorage.getItem('auth_token');
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            if (activeTab === 'employees') {
+                setEmployees(MOCK_EMPLOYEES_DATA);
+                setPendingInvitations(MOCK_PENDING_INVITATIONS_DATA);
+            } else if (activeTab === 'services') {
+                setServices(MOCK_SERVICES_DATA);
+            } else if (activeTab === 'overview') {
+                setStats(MOCK_STATS);
+            }
+            setLoading(false);
         };
-    };
+        loadTab();
+    }, [activeTab]);
 
     const showPopup = (type: 'success' | 'error', message: string) => {
         setPopup({ type, message });
         setTimeout(() => setPopup(null), 3000);
     };
 
-    // --- FETCHER FUNCTIONS ---
-    const fetchEmployees = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch(`${apiUrl}/employees`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            setEmployees(data.data || []);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Removed Data Fetchers (fetchEmployees, fetchServices, etc) in favor of local mock state management
 
-    const fetchPendingInvitations = async () => {
-        try {
-            const res = await fetch(`${apiUrl}/employees/pending`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            setPendingInvitations(data.data || []);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const fetchServices = async () => {
-        setLoading(true);
-        try {
-            // Usually /clinics/{id}/services or just /services if scoped to user's clinic context
-            const res = await fetch(`${apiUrl}/services`, { headers: getAuthHeaders() });
-            const data = await res.json();
-            setServices(data.data || []);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // --- ACTIONS ---
+    // --- ACTIONS MOCK ---
 
     const handleInviteEmployee = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const res = await fetch(`${apiUrl}/employees/invite`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(inviteData)
-            });
-
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.message || 'Error al invitar');
-            }
-
-            showPopup('success', 'Invitación enviada');
+        setLoading(true);
+        setTimeout(() => {
+            const newInvite = {
+                id: Math.random(),
+                email: inviteData.email,
+                role: inviteData.role,
+                created_at: new Date().toISOString().split('T')[0]
+            };
+            setPendingInvitations([...pendingInvitations, newInvite]);
+            showPopup('success', 'Invitación enviada (Mock)');
             setShowInviteModal(false);
             setInviteData({ email: '', role: 'DOCTOR' });
-            fetchPendingInvitations();
-        } catch (err: any) {
-            showPopup('error', err.message);
-        }
+            setLoading(false);
+        }, 500);
     };
 
     const handleCancelInvitation = async (id: number) => {
         if (!confirm('¿Estás seguro de cancelar esta invitación?')) return;
-        try {
-            const res = await fetch(`${apiUrl}/employees/${id}/cancel-invitation`, {
-                method: 'POST',
-                headers: getAuthHeaders()
-            });
-            if (!res.ok) throw new Error('Error al cancelar');
-            showPopup('success', 'Invitación cancelada');
-            fetchPendingInvitations();
-        } catch (err) {
-            showPopup('error', 'No se pudo cancelar la invitación');
-        }
+        setPendingInvitations(prev => prev.filter(inv => inv.id !== id));
+        showPopup('success', 'Invitación cancelada (Mock)');
     };
 
     const handleSaveService = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const method = editingServiceId ? 'PUT' : 'POST';
-            const url = editingServiceId
-                ? `${apiUrl}/services/${editingServiceId}`
-                : `${apiUrl}/services`;
-
-            const body = {
-                clinic_id: clinicId, // Ensure we send clinic_id if required
-                ...serviceData,
-                price: parseFloat(serviceData.price),
-                estimated_time: parseInt(serviceData.estimated_time)
-            };
-
-            const res = await fetch(url, {
-                method,
-                headers: getAuthHeaders(),
-                body: JSON.stringify(body)
-            });
-
-            if (!res.ok) throw new Error('Error al guardar servicio');
-
-            showPopup('success', editingServiceId ? 'Servicio actualizado' : 'Servicio creado');
+        setLoading(true);
+        setTimeout(() => {
+            if (editingServiceId) {
+                // Update
+                setServices(prev => prev.map(s => s.id === editingServiceId ? {
+                    ...s,
+                    ...serviceData,
+                    price: parseFloat(serviceData.price),
+                    estimated_time: parseInt(serviceData.estimated_time)
+                } : s));
+                showPopup('success', 'Servicio actualizado (Mock)');
+            } else {
+                // Create
+                const newService: Service = {
+                    id: Math.floor(Math.random() * 1000),
+                    clinic_id: clinicId,
+                    ...serviceData,
+                    price: parseFloat(serviceData.price),
+                    estimated_time: parseInt(serviceData.estimated_time)
+                };
+                setServices([...services, newService]);
+                showPopup('success', 'Servicio creado (Mock)');
+            }
             setShowServiceModal(false);
             setEditingServiceId(null);
             setServiceData({ name: '', description: '', price: '', estimated_time: '', is_active: true });
-            fetchServices();
-        } catch (err) {
-            showPopup('error', 'Falló la operación');
-        }
+            setLoading(false);
+        }, 500);
     };
 
     const handleDeleteService = async (id: number) => {
         if (!confirm('¿Eliminar este servicio?')) return;
-        try {
-            const res = await fetch(`${apiUrl}/services/${id}`, {
-                method: 'DELETE',
-                headers: getAuthHeaders()
-            });
-            if (!res.ok) throw new Error('Error al eliminar');
-            showPopup('success', 'Servicio eliminado');
-            fetchServices();
-        } catch (err) {
-            showPopup('error', 'No se pudo eliminar');
-        }
+        setServices(prev => prev.filter(s => s.id !== id));
+        showPopup('success', 'Servicio eliminado (Mock)');
     };
 
     const handleOpenEditService = (svc: Service) => {
@@ -283,28 +256,92 @@ export default function ClinicOwnerDashboard({ user, onLogout }: DashboardProps)
 
                 {/* OVERVIEW TAB */}
                 {activeTab === 'overview' && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-blue-100 rounded-lg text-blue-600"><Users className="h-6 w-6" /></div>
+                    <div className="space-y-6">
+                        {/* Key Metrics Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                                 <div>
-                                    <p className="text-gray-500 text-sm">Empleados</p>
-                                    <h3 className="text-2xl font-bold text-gray-900">{employees.length || '-'}</h3>
+                                    <p className="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Ingresos Mensuales</p>
+                                    <h3 className="text-2xl font-bold text-gray-900">${stats.monthly_revenue.toLocaleString()}</h3>
+                                    <span className="text-xs text-green-600 font-medium flex items-center mt-1">
+                                        <TrendingUp className="h-3 w-3 mr-1" /> +12% vs mes anterior
+                                    </span>
+                                </div>
+                                <div className="p-3 bg-indigo-50 rounded-lg text-indigo-600">
+                                    <DollarSign className="h-6 w-6" />
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                                <div>
+                                    <p className="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Citas Hoy</p>
+                                    <h3 className="text-2xl font-bold text-gray-900">{stats.appointments_today}</h3>
+                                    <span className="text-xs text-orange-600 font-medium flex items-center mt-1">
+                                        <Activity className="h-3 w-3 mr-1" /> 3 pendientes
+                                    </span>
+                                </div>
+                                <div className="p-3 bg-orange-50 rounded-lg text-orange-600">
+                                    <Calendar className="h-6 w-6" />
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                                <div>
+                                    <p className="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Pacientes Activos</p>
+                                    <h3 className="text-2xl font-bold text-gray-900">{stats.total_patients}</h3>
+                                    <span className="text-xs text-indigo-600 font-medium flex items-center mt-1">
+                                        +45 nuevos este mes
+                                    </span>
+                                </div>
+                                <div className="p-3 bg-pink-50 rounded-lg text-pink-600">
+                                    <Users className="h-6 w-6" />
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                                <div>
+                                    <p className="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Satisfacción</p>
+                                    <h3 className="text-2xl font-bold text-gray-900">{stats.satisfaction_score}/5.0</h3>
+                                    <span className="text-xs text-gray-400 font-medium flex items-center mt-1">
+                                        Basado en 120 reseñas
+                                    </span>
+                                </div>
+                                <div className="p-3 bg-yellow-50 rounded-lg text-yellow-600">
+                                    <TrendingUp className="h-6 w-6" />
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-green-100 rounded-lg text-green-600"><Stethoscope className="h-6 w-6" /></div>
-                                <div>
-                                    <p className="text-gray-500 text-sm">Servicios Activos</p>
-                                    <h3 className="text-2xl font-bold text-gray-900">{services.length || '-'}</h3>
+
+                        {/* Secondary Metrics & Welcome */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-blue-100 rounded-lg text-blue-600"><Users className="h-6 w-6" /></div>
+                                    <div>
+                                        <p className="text-gray-500 text-sm">Equipo Médico</p>
+                                        <h3 className="text-2xl font-bold text-gray-900">{MOCK_EMPLOYEES_DATA.length}</h3>
+                                        <p className="text-xs text-gray-400">Empleados registrados</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white p-6 rounded-xl shadow-lg">
-                            <h3 className="font-bold text-lg mb-2">Bienvenido al Panel</h3>
-                            <p className="text-indigo-100 text-sm mb-4">Gestiona tu clínica, personal y servicios desde este panel de control centralizado.</p>
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-green-100 rounded-lg text-green-600"><Stethoscope className="h-6 w-6" /></div>
+                                    <div>
+                                        <p className="text-gray-500 text-sm">Servicios Activos</p>
+                                        <h3 className="text-2xl font-bold text-gray-900">{MOCK_SERVICES_DATA.length}</h3>
+                                        <p className="text-xs text-gray-400">En catálogo público</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
+                                <div className="relative z-10">
+                                    <h3 className="font-bold text-lg mb-2">Bienvenido al Panel</h3>
+                                    <p className="text-indigo-100 text-sm mb-4">Gestiona tu clínica con datos en tiempo real.</p>
+                                </div>
+                                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white opacity-10 rounded-full"></div>
+                                <div className="absolute top-4 right-4 w-12 h-12 bg-white opacity-5 rounded-full"></div>
+                            </div>
                         </div>
                     </div>
                 )}
