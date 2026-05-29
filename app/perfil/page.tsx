@@ -14,7 +14,6 @@ type DashboardRole = 'user' | 'employee' | 'owner' | 'admin';
 
 export default function UnifiedDashboardPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
     const [user, setUser] = useState<User | null>(null);
