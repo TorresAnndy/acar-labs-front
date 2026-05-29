@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import UserDashboard from '@/components/dashboard/UserDashboard';
 import ClinicOwnerDashboard from '@/components/dashboard/ClinicOwnerDashboard';
 import EmployeeDashboard from '@/components/dashboard/EmployeeDashboard';
@@ -23,6 +23,13 @@ export default function UnifiedDashboardPage() {
     const [selectedClinicId, setSelectedClinicId] = useState<number | null>(null);
     const [selectedClinicName, setSelectedClinicName] = useState<string | null>(null);
     const [selectedClinicRole, setSelectedClinicRole] = useState<string | null>(null);
+    const [clinicIdParam, setClinicIdParam] = useState<number | null>(null);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const clinicId = Number(params.get('clinic_id') || '');
+        setClinicIdParam(clinicId || null);
+    }, []);
 
     useEffect(() => {
         fetchUser();
@@ -37,7 +44,7 @@ export default function UnifiedDashboardPage() {
         return () => {
             window.removeEventListener('user-updated', handleUserUpdate);
         };
-    }, [searchParams]);
+    }, [clinicIdParam]);
 
     const fetchUser = async () => {
         try {
@@ -66,7 +73,7 @@ export default function UnifiedDashboardPage() {
             const userData = data.data || data;
             setUser(userData);
 
-            const clinicIdParam = Number(searchParams.get('clinic_id') || '');
+            const clinicId = clinicIdParam || 0;
             let selectedEmployee = null;
 
             if (clinicIdParam && userData.employees && userData.employees.length > 0) {
