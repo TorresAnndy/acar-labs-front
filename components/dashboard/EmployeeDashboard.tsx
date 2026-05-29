@@ -18,6 +18,7 @@ import Popup from '../ui/Popup';
 interface DashboardProps {
     user: UserType;
     onLogout: () => void;
+    selectedClinicId?: number | null;
 }
 
 type Tab = 'appointments' | 'services' | 'profile';
@@ -75,7 +76,7 @@ const MOCK_CLINICS = [
     { id: 993, name: 'Centro Especialidades Sur' },
 ];
 
-export default function EmployeeDashboard({ user, onLogout }: DashboardProps) {
+export default function EmployeeDashboard({ user, onLogout, selectedClinicId: selectedClinicIdProp }: DashboardProps) {
     const [activeTab, setActiveTab] = useState<Tab>('appointments');
     const [popup, setPopup] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
@@ -88,10 +89,30 @@ export default function EmployeeDashboard({ user, onLogout }: DashboardProps) {
     const [services, setServices] = useState<Service[]>([]);
     const [loadingServices, setLoadingServices] = useState(false);
 
+    const employeeForSelectedClinic = selectedClinicIdProp
+        ? user.employees?.find((employee) => employee.clinic?.id === Number(selectedClinicIdProp))
+        : undefined;
+    const defaultEmployee = employeeForSelectedClinic || user.employees?.[0];
+    const defaultClinic = defaultEmployee?.clinic;
+
     // Clinic Selection State
     const [availableClinics, setAvailableClinics] = useState<any[]>(MOCK_CLINICS);
-    const [selectedClinicId, setSelectedClinicId] = useState<number | string>(user.employees?.[0]?.clinic?.id || 991);
-    const [currentClinicName, setCurrentClinicName] = useState(user.employees?.[0]?.clinic?.name || 'Smartlabs Central');
+    const [selectedClinicId, setSelectedClinicId] = useState<number | string>(
+        defaultClinic?.id || user.employees?.[0]?.clinic?.id || 991
+    );
+    const [currentClinicName, setCurrentClinicName] = useState(
+        defaultClinic?.name || user.employees?.[0]?.clinic?.name || 'Smartlabs Central'
+    );
+
+    useEffect(() => {
+        if (selectedClinicIdProp) {
+            const found = user.employees?.find((employee) => employee.clinic?.id === Number(selectedClinicIdProp));
+            if (found) {
+                setSelectedClinicId(found.clinic?.id || found.clinic_id || selectedClinicIdProp);
+                setCurrentClinicName(found.clinic?.name || 'Clínica asociada');
+            }
+        }
+    }, [selectedClinicIdProp, user.employees]);
 
     // Profile State
     const [profileData, setProfileData] = useState({
@@ -538,6 +559,45 @@ export default function EmployeeDashboard({ user, onLogout }: DashboardProps) {
                                         Cambiar Contraseña
                                     </button>
                                 </form>
+
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+                                    <div className="flex items-center justify-between gap-4 mb-4">
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-900">Clínicas asociadas</h3>
+                                            <p className="text-sm text-gray-500">Abre una clínica en otra pestaña para gestionar con el rol que tienes en ella.</p>
+                                        </div>
+                                    </div>
+
+                                    {user.employees?.length ? (
+                                        <div className="space-y-3">
+                                            {user.employees.map((employee) => (
+                                                <div key={employee.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-gray-50 border border-gray-100 rounded-2xl">
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-gray-900">{employee.clinic?.name || 'Clínica asociada'}</p>
+                                                        <p className="text-sm text-gray-500">Rol: {employee.role?.name || 'Empleado'}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {selectedClinicId?.toString() === employee.clinic?.id?.toString() && (
+                                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
+                                                                Seleccionada
+                                                            </span>
+                                                        )}
+                                                        <a
+                                                            href={`/perfil?clinic_id=${employee.clinic?.id || employee.clinic_id}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                                                        >
+                                                            Abrir en nueva pestaña
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-500">No estás asociado a ninguna clínica.</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}

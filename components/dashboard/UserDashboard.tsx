@@ -12,11 +12,12 @@ import Popup from '@/components/ui/Popup';
 interface UserDashboardProps {
     user: User;
     onLogout: () => void;
+    selectedClinicId?: number | null;
 }
 
 type Tab = 'profile' | 'appointments' | 'plans' | 'results';
 
-export default function UserDashboard({ user, onLogout }: UserDashboardProps) {
+export default function UserDashboard({ user, onLogout, selectedClinicId }: UserDashboardProps) {
     const [activeTab, setActiveTab] = useState<Tab>('profile');
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loadingAppointments, setLoadingAppointments] = useState(false);
@@ -39,6 +40,12 @@ export default function UserDashboard({ user, onLogout }: UserDashboardProps) {
     const closePopup = () => {
         setPopup({ ...popup, isOpen: false });
     };
+
+    const associatedClinics = user.employees?.map((employee) => ({
+        id: employee.clinic?.id || employee.clinic_id,
+        name: employee.clinic?.name || 'Clínica asociada',
+        role: employee.role?.name || 'Empleado',
+    })) || [];
 
     // --- Profile Form State ---
     const [profileForm, setProfileForm] = useState({
@@ -320,6 +327,45 @@ export default function UserDashboard({ user, onLogout }: UserDashboardProps) {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
+                            <div className="flex items-center justify-between gap-4 mb-4">
+                                <div>
+                                    <h2 className="text-xl font-semibold text-gray-900">Clínicas asociadas</h2>
+                                    <p className="text-sm text-gray-500">Abre una clínica en otra pestaña para gestionar según tu rol en esa clínica.</p>
+                                </div>
+                            </div>
+
+                            {associatedClinics.length === 0 ? (
+                                <p className="text-sm text-gray-500">No estás asociado a ninguna clínica todavía.</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {associatedClinics.map((clinic) => (
+                                        <div key={clinic.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900">{clinic.name}</p>
+                                                <p className="text-sm text-gray-500">Rol: {clinic.role}</p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {selectedClinicId === clinic.id && (
+                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
+                                                        Seleccionada
+                                                    </span>
+                                                )}
+                                                <a
+                                                    href={`/perfil?clinic_id=${clinic.id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                                                >
+                                                    Abrir en nueva pestaña
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

@@ -23,6 +23,7 @@ import Popup from '../ui/Popup';
 interface DashboardProps {
     user: UserType;
     onLogout: () => void;
+    selectedClinicId?: number | null;
 }
 
 type Tab = 'overview' | 'employees' | 'services' | 'settings' | 'profile';
@@ -54,7 +55,7 @@ const MOCK_SERVICES_DATA: Service[] = [
     { id: 4, name: 'Blanqueamiento', description: 'Estético.', price: 200, estimated_time: 60, is_active: false },
 ];
 
-export default function ClinicOwnerDashboard({ user, onLogout }: DashboardProps) {
+export default function ClinicOwnerDashboard({ user, onLogout, selectedClinicId }: DashboardProps) {
     const [activeTab, setActiveTab] = useState<Tab>('overview');
     const [popup, setPopup] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
@@ -79,7 +80,10 @@ export default function ClinicOwnerDashboard({ user, onLogout }: DashboardProps)
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
     // Derived
-    const myClinic = user.employees?.[0]?.clinic;
+    const clinicFromUrl = user.employees?.find((employee) =>
+        employee.clinic?.id === Number(selectedClinicId)
+    )?.clinic;
+    const myClinic = clinicFromUrl || user.employees?.[0]?.clinic;
     const clinicId = myClinic?.id;
 
     useEffect(() => {
@@ -462,12 +466,47 @@ export default function ClinicOwnerDashboard({ user, onLogout }: DashboardProps)
                 )}
 
                 {activeTab === 'profile' && (
-                    <div className="bg-white p-10 rounded-xl shadow-sm border border-gray-200 text-center">
-                        <User className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                        <h2 className="text-xl font-bold">{user.name}</h2>
-                        <p className="text-gray-500">{user.email}</p>
-                        <div className="mt-8 p-4 bg-orange-50 text-orange-800 rounded-lg text-sm inline-block">
-                            Para editar tu perfil personal, por favor contacta al administrador del sistema o usa la app móvil.
+                    <div className="space-y-6">
+                        <div className="bg-white p-10 rounded-xl shadow-sm border border-gray-200 text-center">
+                            <User className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                            <h2 className="text-xl font-bold">{user.name}</h2>
+                            <p className="text-gray-500">{user.email}</p>
+                            <div className="mt-8 p-4 bg-orange-50 text-orange-800 rounded-lg text-sm inline-block">
+                                Para editar tu perfil personal, por favor contacta al administrador del sistema o usa la app móvil.
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div className="flex items-center justify-between gap-4 mb-4">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900">Clínicas asociadas</h3>
+                                    <p className="text-sm text-gray-500">Haz clic en una clínica para abrirla en otra pestaña y gestionar según tu rol.</p>
+                                </div>
+                            </div>
+                            {user.employees?.length ? (
+                                <div className="space-y-3">
+                                    {user.employees.map((employee) => (
+                                        <div key={employee.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900">{employee.clinic?.name || 'Clínica asociada'}</p>
+                                                <p className="text-sm text-gray-500">Rol: {employee.role?.name || 'Empleado'}</p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <a
+                                                    href={`/perfil?clinic_id=${employee.clinic?.id || employee.clinic_id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+                                                >
+                                                    Abrir en nueva pestaña
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-gray-500">No hay clínicas asociadas a esta cuenta.</p>
+                            )}
                         </div>
                     </div>
                 )}

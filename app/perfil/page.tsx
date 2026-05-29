@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import UserDashboard from '@/components/dashboard/UserDashboard';
 import ClinicOwnerDashboard from '@/components/dashboard/ClinicOwnerDashboard';
 import EmployeeDashboard from '@/components/dashboard/EmployeeDashboard';
@@ -14,11 +14,15 @@ type DashboardRole = 'user' | 'employee' | 'owner' | 'admin';
 
 export default function UnifiedDashboardPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentRole, setCurrentRole] = useState<DashboardRole>('user');
+    const [selectedClinicId, setSelectedClinicId] = useState<number | null>(null);
+    const [selectedClinicName, setSelectedClinicName] = useState<string | null>(null);
+    const [selectedClinicRole, setSelectedClinicRole] = useState<string | null>(null);
 
     useEffect(() => {
         fetchUser();
@@ -33,7 +37,7 @@ export default function UnifiedDashboardPage() {
         return () => {
             window.removeEventListener('user-updated', handleUserUpdate);
         };
-    }, []);
+    }, [searchParams]);
 
     const fetchUser = async () => {
         try {
@@ -62,6 +66,30 @@ export default function UnifiedDashboardPage() {
             const userData = data.data || data;
             setUser(userData);
 
+            const clinicIdParam = Number(searchParams.get('clinic_id') || '');
+            let selectedEmployee = null;
+
+            if (clinicIdParam && userData.employees && userData.employees.length > 0) {
+                selectedEmployee = userData.employees.find((employee: any) =>
+                    employee.clinic?.id === clinicIdParam || employee.clinic_id === clinicIdParam
+                );
+            }
+
+            if (!selectedEmployee && userData.employees && userData.employees.length > 0) {
+                selectedEmployee = userData.employees[0];
+            }
+
+            if (selectedEmployee) {
+                const clinicId = selectedEmployee.clinic?.id || selectedEmployee.clinic_id || null;
+                setSelectedClinicId(clinicId);
+                setSelectedClinicName(selectedEmployee.clinic?.name || 'Clínica asociada');
+                setSelectedClinicRole(selectedEmployee.role?.name || null);
+            } else {
+                setSelectedClinicId(null);
+                setSelectedClinicName(null);
+                setSelectedClinicRole(null);
+            }
+
             // Determine Role Logic
             let detectedRole: DashboardRole = 'user';
 
@@ -70,21 +98,12 @@ export default function UnifiedDashboardPage() {
                 detectedRole = 'admin';
             }
             // 2. Check Employee roles (Clinic Context)
-            else if (userData.employees && userData.employees.length > 0) {
-                const employee = userData.employees[0];
-                const roleName = employee.role?.name?.toUpperCase();
+            else if (selectedEmployee) {
+                const roleName = selectedEmployee.role?.name?.toUpperCase();
 
                 if (roleName === 'OWNER') {
                     detectedRole = 'owner';
                 } else if (roleName === 'ADMIN') {
-                    // If they are an 'ADMIN' within a clinic scope, they might see ClinicOwner or Admin dashboard?
-                    // Usually 'ADMIN' in employee context implies Clinic Manager/Owner level.
-                    // But if the requirement separates 'AdminDashboard' (App Level) vs 'ClinicOwner' (Clinic Level),
-                    // we need to be careful.
-                    // Assuming 'ADMIN' role in employee table = Clinic Admin -> ClinicOwnerDashboard or specific ?
-                    // User request said: "si eres admin miras el AdminDashboard.tsx"
-                    // Let's map it to admin for now, but usually employee-admin is clinic-level.
-                    // Given the previous code, let's treat explicit 'ADMIN' role as global Admin if not owner.
                     detectedRole = 'admin';
                 } else {
                     detectedRole = 'employee';
@@ -132,9 +151,27 @@ export default function UnifiedDashboardPage() {
 
     return (
         <>
-            {currentRole === 'user' && <UserDashboard user={user} onLogout={handleLogout} />}
-            {currentRole === 'owner' && <ClinicOwnerDashboard user={user} onLogout={handleLogout} />}
-            {currentRole === 'employee' && <EmployeeDashboard user={user} onLogout={handleLogout} />}
+            {currentRole === 'user' && (
+                <UserDashboard
+                    user={user}
+                    onLogout={handleLogout}
+                    selectedClinicId={selectedClinicId}
+                />
+            )}
+            {currentRole === 'owner' && (
+                <ClinicOwnerDashboard
+                    user={user}
+                    onLogout={handleLogout}
+                    selectedClinicId={selectedClinicId}
+                />
+            )}
+            {currentRole === 'employee' && (
+                <EmployeeDashboard
+                    user={user}
+                    onLogout={handleLogout}
+                    selectedClinicId={selectedClinicId}
+                />
+            )}
             {currentRole === 'admin' && <AdminDashboard user={user} onLogout={handleLogout} />}
         </>
     );
